@@ -115,8 +115,8 @@
   </footer>
 
   <script>
-    const BACKEND_API_URL = "https://script.google.com/macros/s/AKfycbzD8-_LtxQ8O4-bSWg-n7yXJkK9ZFmEJ3gNgXcdwBKevES7w2GBYekRmcr6dzSvUkLpRQ/exec";
-    const COOLDOWN_SECONDS = 300; // 5 minutes = 300 seconds
+    const BACKEND_API_URL = "https://script.google.com/macros/s/AKfycbw37GtUEZwRdU19Lkjy82N-f_KQUIol8Te189YeYGjFqwPHgqESZk048o8Fa0_vNfiY/exec";
+    const COOLDOWN_SECONDS = 300; // 5 minutes
     let captchaToken = "";
     let referrerWallet = "";
     let timerInterval = null;
@@ -124,6 +124,14 @@
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       referrerWallet = urlParams.get('ref') || "";
+
+      // Automatically reload saved wallet address and balance on page refresh
+      const savedWallet = localStorage.getItem('nexus_saved_wallet');
+      if (savedWallet) {
+        document.getElementById('wallet').value = savedWallet;
+        checkBalance();
+      }
+
       checkCooldown();
     });
 
@@ -171,6 +179,9 @@
       const wallet = document.getElementById('wallet').value.trim();
       if (!wallet) return;
 
+      // Save wallet locally so refresh retains user balance
+      localStorage.setItem('nexus_saved_wallet', wallet);
+
       const baseUrl = window.location.origin + window.location.pathname;
       document.getElementById('refLinkInput').value = `${baseUrl}?ref=${wallet}`;
 
@@ -201,6 +212,9 @@
 
       if (!wallet) return showStatus("Please enter your FaucetPay wallet address first.", "error");
       if (!captchaToken) return showStatus("Please solve the CAPTCHA check.", "error");
+
+      // Save wallet on claim/withdraw action
+      localStorage.setItem('nexus_saved_wallet', wallet);
 
       claimBtn.disabled = true;
       withdrawBtn.disabled = true;
@@ -260,4 +274,4 @@
   </script>
 </body>
   </html>
-          
+  
