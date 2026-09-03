@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nexus Faucet - Earn & Withdraw</title>
+  <title>Nexus Faucet - Earn & Withdraw USDT</title>
 
   <!-- Tailwind CSS & Cloudflare Turnstile -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-  <!-- PASTE POPADS SCRIPT HERE ONCE APPROVED -->
+  <!-- PASTE POPADS CODE BELOW THIS LINE ONCE APPROVED -->
+
+  <!-- PASTE POPADS CODE ABOVE THIS LINE ONCE APPROVED -->
 
   <style>
     body {
@@ -26,13 +28,13 @@
       <div class="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">⚡</div>
       <div>
         <h1 class="font-extrabold text-base tracking-tight">NEXUS<span class="text-cyan-400">FAUCET</span></h1>
-        <p class="text-[10px] text-slate-400">Earn & Withdraw to FaucetPay</p>
+        <p class="text-[10px] text-slate-400">Earn & Withdraw USDT to FaucetPay</p>
       </div>
     </div>
 
     <div class="bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-xl text-right">
       <div class="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Unclaimed Balance</div>
-      <div id="balanceDisplay" class="text-xs font-black text-cyan-400">0 Satoshis</div>
+      <div id="balanceDisplay" class="text-xs font-black text-cyan-400">0 USDT</div>
     </div>
   </header>
 
@@ -109,21 +111,60 @@
   </main>
 
   <footer class="w-full max-w-md text-center py-4 text-xs text-slate-500">
-    <p>© 2026 Nexus Faucet. Minimum withdrawal: 1,000 Satoshis.</p>
+    <p>© 2026 Nexus Faucet. Minimum withdrawal: 1,000 USDT units.</p>
   </footer>
 
   <script>
     const BACKEND_API_URL = "https://script.google.com/macros/s/AKfycbw37GtUEZwRdU19Lkjy82N-f_KQUIol8Te189YeYGjFqwPHgqESZk048o8Fa0_vNfiY/exec";
+    const COOLDOWN_SECONDS = 300; // 5 minutes = 300 seconds
     let captchaToken = "";
     let referrerWallet = "";
+    let timerInterval = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       referrerWallet = urlParams.get('ref') || "";
+      checkCooldown();
     });
 
     function onCaptchaComplete(t) {
       captchaToken = t;
+    }
+
+    function checkCooldown() {
+      const lastClaim = localStorage.getItem('nexus_last_claim');
+      if (!lastClaim) return;
+
+      const elapsed = Math.floor((Date.now() - parseInt(lastClaim)) / 1000);
+      const remaining = COOLDOWN_SECONDS - elapsed;
+
+      if (remaining > 0) {
+        startTimer(remaining);
+      } else {
+        localStorage.removeItem('nexus_last_claim');
+      }
+    }
+
+    function startTimer(seconds) {
+      const claimBtn = document.getElementById('claimBtn');
+      claimBtn.disabled = true;
+
+      if (timerInterval) clearInterval(timerInterval);
+
+      let timeLeft = seconds;
+      timerInterval = setInterval(() => {
+        const mins = Math.floor(timeLeft / 60);
+        const secs = timeLeft % 60;
+        claimBtn.innerText = `WAIT ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          claimBtn.disabled = false;
+          claimBtn.innerText = "CLAIM REWARD";
+          localStorage.removeItem('nexus_last_claim');
+        }
+        timeLeft--;
+      }, 1000);
     }
 
     async function checkBalance() {
@@ -177,13 +218,20 @@
 
         const data = await response.json();
 
-        claimBtn.disabled = false;
         withdrawBtn.disabled = false;
 
         if (data.success) {
           showStatus(data.message, "success");
           if (data.balance !== undefined) updateBalanceUI(data.balance);
+
+          if (actionType === 'claim') {
+            localStorage.setItem('nexus_last_claim', Date.now().toString());
+            startTimer(COOLDOWN_SECONDS);
+          } else {
+            claimBtn.disabled = false;
+          }
         } else {
+          claimBtn.disabled = false;
           showStatus(data.message, "error");
         }
       } catch (err) {
@@ -197,7 +245,7 @@
     }
 
     function updateBalanceUI(amount) {
-      document.getElementById('balanceDisplay').innerText = `${amount.toLocaleString()} Satoshis`;
+      document.getElementById('balanceDisplay').innerText = `${amount.toLocaleString()} USDT`;
     }
 
     function showStatus(msg, type) {
@@ -211,5 +259,5 @@
     }
   </script>
 </body>
-      </html>
-
+  </html>
+          
