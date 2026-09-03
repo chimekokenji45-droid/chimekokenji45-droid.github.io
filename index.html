@@ -33,7 +33,7 @@
     </div>
 
     <!-- BALANCE DISPLAY -->
-    <div id="balanceContainer" class="hidden bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-xl text-right">
+    <div id="balanceContainer" class="bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-xl text-right">
       <div class="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Unclaimed Balance</div>
       <div id="balanceDisplay" class="text-xs font-black text-cyan-400">0 USDT</div>
     </div>
@@ -43,62 +43,40 @@
   <main class="w-full max-w-md space-y-4 my-auto">
     <div id="statusBox" class="hidden transition-all rounded-xl p-4 border text-xs font-medium text-center"></div>
 
-    <!-- LOGIN SCREEN -->
-    <div id="loginScreen" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-5">
-      <div class="text-center space-y-1">
-        <h2 class="text-lg font-bold text-white">Welcome Back</h2>
-        <p class="text-xs text-slate-400">Enter your FaucetPay address to access your account</p>
-      </div>
-
+    <!-- FAUCET CARD (SINGLE PAGE) -->
+    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-5">
+      
+      <!-- WALLET INPUT -->
       <div>
         <label for="walletInput" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-          FaucetPay Account Email / Address
+          FaucetPay Address / Email
         </label>
         <input 
           type="text" 
           id="walletInput" 
           required 
           placeholder="Enter FaucetPay address or email" 
+          oninput="onWalletChanged()"
           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition"
         />
-        
         <p class="mt-2 text-center text-[11px] text-slate-400">
-          Don't have a FaucetPay account? 
-          <a 
-            href="https://faucetpay.io" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            class="text-cyan-400 font-bold hover:underline transition"
-          >
-            Create one here
+          Don't have an account? 
+          <a href="https://faucetpay.io" target="_blank" rel="noopener noreferrer" class="text-cyan-400 font-bold hover:underline">
+            Create FaucetPay Account
           </a>
         </p>
       </div>
 
-      <button 
-        type="button" 
-        onclick="loginUser()" 
-        id="loginBtn" 
-        class="w-full bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 font-bold py-3 rounded-xl transition text-slate-950 text-xs uppercase tracking-wider"
-      >
-        Enter Faucet
-      </button>
-    </div>
-
-    <!-- MAIN DASHBOARD -->
-    <div id="dashboardScreen" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-5">
-      
-      <div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-xl px-3 py-2">
-        <div class="truncate text-xs text-slate-300 font-mono pr-2" id="activeWalletDisplay"></div>
-        <button onclick="logoutUser()" class="text-[10px] text-slate-500 hover:text-cyan-400 font-bold uppercase tracking-wider">
-          Switch
-        </button>
+      <!-- CLOUDFLARE GATEWAY -->
+      <div class="flex justify-center py-1">
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAElyUDcSuYmcOyg-" data-theme="dark" data-callback="onCaptchaVerified"></div>
       </div>
 
+      <!-- ACTION BUTTONS -->
       <div class="grid grid-cols-2 gap-3">
         <button 
           type="button" 
-          onclick="openVerificationModal('claim')" 
+          onclick="handleAction('claim')" 
           id="claimBtn" 
           class="w-full bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 disabled:bg-slate-800 disabled:text-slate-600 font-bold py-3 rounded-xl transition text-slate-950 text-xs uppercase tracking-wider"
         >
@@ -107,7 +85,7 @@
 
         <button 
           type="button" 
-          onclick="openVerificationModal('withdraw')" 
+          onclick="handleAction('withdraw')" 
           id="withdrawBtn" 
           class="w-full bg-slate-800 hover:bg-slate-700 active:bg-slate-800 border border-slate-700 font-bold py-3 rounded-xl transition text-cyan-400 text-xs uppercase tracking-wider"
         >
@@ -115,6 +93,7 @@
         </button>
       </div>
 
+      <!-- REFERRAL LINK -->
       <div class="border-t border-slate-800 pt-4 space-y-2">
         <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
           Your Referral Link (Earn 20% Commission)
@@ -139,51 +118,6 @@
     </div>
   </main>
 
-  <!-- ================= SECURITY VERIFICATION MODAL ================= -->
-  <div id="securityModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-    <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-4">
-      
-      <!-- Modal Header -->
-      <div class="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 p-5 text-white flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold border border-white/30">
-          🛡️
-        </div>
-        <div>
-          <h3 class="font-bold text-base">Security Verification</h3>
-          <p class="text-xs text-purple-100">Complete verification to continue</p>
-        </div>
-      </div>
-
-      <!-- Modal Body -->
-      <div class="p-5 pt-2 space-y-4 text-center">
-        <p class="text-xs text-slate-300">Please complete the turnstile below.</p>
-        
-        <div class="flex justify-center py-2">
-          <div class="cf-turnstile" data-sitekey="0x4AAAAAAElyUDcSuYmcOyg-" data-theme="dark" data-callback="onCaptchaVerified"></div>
-        </div>
-
-        <div class="flex gap-2">
-          <button 
-            type="button" 
-            onclick="refreshTurnstile()" 
-            class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold py-2.5 rounded-xl text-slate-300 text-xs transition"
-          >
-            Refresh Turnstile
-          </button>
-          
-          <button 
-            type="button" 
-            onclick="closeVerificationModal()" 
-            class="w-full bg-slate-950 hover:bg-slate-800 border border-slate-800 font-bold py-2.5 rounded-xl text-slate-400 text-xs transition"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
   <footer class="w-full max-w-md text-center py-4 text-xs text-slate-500">
     <p>© 2026 Nexus Faucet. Minimum withdrawal: 1,000 USDT units.</p>
   </footer>
@@ -193,8 +127,6 @@
     const COOLDOWN_SECONDS = 300; // 5 minutes
     let captchaToken = "";
     let referrerWallet = "";
-    let activeWallet = "";
-    let pendingAction = "";
     let timerInterval = null;
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -203,67 +135,29 @@
 
       const savedWallet = localStorage.getItem('nexus_saved_wallet');
       if (savedWallet) {
-        activeWallet = savedWallet;
-        showDashboard();
+        document.getElementById('walletInput').value = savedWallet;
+        updateRefLink(savedWallet);
+        fetchBalance(savedWallet);
       }
-    });
-
-    function loginUser() {
-      const wallet = document.getElementById('walletInput').value.trim();
-      if (!wallet) return showStatus("Please enter your FaucetPay wallet address or email.", "error");
-
-      activeWallet = wallet;
-      localStorage.setItem('nexus_saved_wallet', wallet);
-      showDashboard();
-    }
-
-    function showDashboard() {
-      document.getElementById('loginScreen').classList.add('hidden');
-      document.getElementById('dashboardScreen').classList.remove('hidden');
-      document.getElementById('balanceContainer').classList.remove('hidden');
-      document.getElementById('activeWalletDisplay').innerText = activeWallet;
-
-      const baseUrl = window.location.origin + window.location.pathname;
-      document.getElementById('refLinkInput').value = `${baseUrl}?ref=${activeWallet}`;
-
-      fetchBalance();
       checkCooldown();
-    }
-
-    function logoutUser() {
-      localStorage.removeItem('nexus_saved_wallet');
-      activeWallet = "";
-      document.getElementById('loginScreen').classList.remove('hidden');
-      document.getElementById('dashboardScreen').classList.add('hidden');
-      document.getElementById('balanceContainer').classList.add('hidden');
-      closeVerificationModal();
-    }
-
-    function openVerificationModal(actionType) {
-      if (!activeWallet) return showStatus("Please log in first.", "error");
-      pendingAction = actionType;
-      document.getElementById('securityModal').classList.remove('hidden');
-      refreshTurnstile();
-    }
-
-    function closeVerificationModal() {
-      document.getElementById('securityModal').classList.add('hidden');
-      pendingAction = "";
-      captchaToken = "";
-    }
-
-    function refreshTurnstile() {
-      captchaToken = "";
-      if (window.turnstile) turnstile.reset();
-    }
+    });
 
     function onCaptchaVerified(token) {
       captchaToken = token;
-      if (pendingAction) {
-        const actionToExecute = pendingAction;
-        closeVerificationModal();
-        executeAction(actionToExecute, token);
+    }
+
+    function onWalletChanged() {
+      const wallet = document.getElementById('walletInput').value.trim();
+      if (wallet) {
+        localStorage.setItem('nexus_saved_wallet', wallet);
+        updateRefLink(wallet);
+        fetchBalance(wallet);
       }
+    }
+
+    function updateRefLink(wallet) {
+      const baseUrl = window.location.origin + window.location.pathname;
+      document.getElementById('refLinkInput').value = `${baseUrl}?ref=${wallet}`;
     }
 
     function checkCooldown() {
@@ -302,13 +196,13 @@
       }, 1000);
     }
 
-    async function fetchBalance() {
-      if (!activeWallet) return;
+    async function fetchBalance(wallet) {
+      if (!wallet) return;
 
       try {
         const res = await fetch(BACKEND_API_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'balance', wallet: activeWallet })
+          body: JSON.stringify({ action: 'balance', wallet: wallet })
         });
         const data = await res.json();
         if (data.success) updateBalanceUI(data.balance);
@@ -319,15 +213,19 @@
 
     function copyRefLink() {
       const input = document.getElementById('refLinkInput');
-      if (!input.value) return showStatus("Please log in first.", "error");
+      if (!input.value) return showStatus("Please enter your wallet address first.", "error");
       input.select();
       navigator.clipboard.writeText(input.value);
       showStatus("Referral link copied to clipboard!", "success");
     }
 
-    async function executeAction(actionType, verifiedToken) {
+    async function handleAction(actionType) {
+      const wallet = document.getElementById('walletInput').value.trim();
       const claimBtn = document.getElementById('claimBtn');
       const withdrawBtn = document.getElementById('withdrawBtn');
+
+      if (!wallet) return showStatus("Please enter your FaucetPay wallet address or email.", "error");
+      if (!captchaToken) return showStatus("Please complete the Cloudflare verification.", "error");
 
       claimBtn.disabled = true;
       withdrawBtn.disabled = true;
@@ -340,9 +238,9 @@
           method: 'POST',
           body: JSON.stringify({
             action: actionType,
-            wallet: activeWallet,
+            wallet: wallet,
             referrer: referrerWallet,
-            captchaToken: verifiedToken
+            captchaToken: captchaToken
           })
         });
 
@@ -373,6 +271,9 @@
         claimBtn.innerText = "CLAIM REWARD";
         withdrawBtn.innerText = "WITHDRAW";
         showStatus("Server request failed. Please check network connection.", "error");
+      } finally {
+        if (window.turnstile) turnstile.reset();
+        captchaToken = "";
       }
     }
 
@@ -391,5 +292,5 @@
     }
   </script>
 </body>
-            </html>
+        </html>
   
