@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus Faucet - Earn & Withdraw</title>
+
+  <!-- Tailwind CSS & Cloudflare Turnstile -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+  <!-- PASTE POPADS SCRIPT HERE -->
+
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 0%, #0f172a 0%, #020617 100%);
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body class="text-slate-100 flex flex-col items-center justify-between p-4 min-h-screen">
+
+  <!-- ENTRY CAPTCHA GATEWAY -->
+  <div id="entryGate" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-4">
+    <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl max-w-sm w-full text-center space-y-6 shadow-2xl">
+      <div class="w-16 h-16 bg-cyan-500/10 border border-cyan-500/30 rounded-2xl flex items-center justify-center mx-auto text-cyan-400">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-white mb-1">Human Verification</h2>
+        <p class="text-xs text-slate-400">Complete verification to enter the site.</p>
+      </div>
+
+      <div class="flex justify-center">
+        <div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITE_KEY" data-theme="dark" data-callback="unlockSite"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER & BALANCE DISPLAY -->
+  <header class="w-full max-w-md flex items-center justify-between py-4">
+    <div class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">⚡</div>
+      <div>
+        <h1 class="font-extrabold text-base tracking-tight">NEXUS<span class="text-cyan-400">FAUCET</span></h1>
+        <p class="text-[10px] text-slate-400">Earn & Withdraw to FaucetPay</p>
+      </div>
+    </div>
+
+    <div class="bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-xl text-right">
+      <div class="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Unclaimed Balance</div>
+      <div id="balanceDisplay" class="text-xs font-black text-cyan-400">0 Satoshis</div>
+    </div>
+  </header>
+
+  <!-- MAIN DASHBOARD -->
+  <main class="w-full max-w-md space-y-4 my-auto">
+    <div id="statusBox" class="hidden transition-all rounded-xl p-4 border text-xs font-medium text-center"></div>
+
+    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-5">
+      
+      <div>
+        <label for="wallet" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+          FaucetPay Account Email / Address
+        </label>
+        <input 
+          type="text" 
+          id="wallet" 
+          required 
+          onblur="checkBalance()"
+          placeholder="Enter FaucetPay address or email" 
+          class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition"
+        />
+      </div>
+
+      <!-- CAPTCHA WIDGET -->
+      <div class="flex justify-center py-2">
+        <div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITE_KEY" data-theme="dark" data-callback="onCaptchaComplete"></div>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="grid grid-cols-2 gap-3">
+        <button 
+          type="button" 
+          onclick="handleAction('claim')" 
+          id="claimBtn" 
+          class="w-full bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 disabled:bg-slate-800 disabled:text-slate-600 font-bold py-3 rounded-xl transition text-slate-950 text-xs uppercase tracking-wider"
+        >
+          Claim Reward
+        </button>
+
+        <button 
+          type="button" 
+          onclick="handleAction('withdraw')" 
+          id="withdrawBtn" 
+          class="w-full bg-slate-800 hover:bg-slate-700 active:bg-slate-800 border border-slate-700 font-bold py-3 rounded-xl transition text-cyan-400 text-xs uppercase tracking-wider"
+        >
+          Withdraw
+        </button>
+      </div>
+
+      <!-- REFERRAL LINK BOX -->
+      <div class="border-t border-slate-800 pt-4 space-y-2">
+        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          Your Referral Link (Earn 10% Commission)
+        </label>
+        <div class="flex gap-2">
+          <input 
+            type="text" 
+            id="refLinkInput" 
+            readonly 
+            placeholder="Enter wallet above to generate link" 
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 focus:outline-none"
+          />
+          <button 
+            type="button" 
+            onclick="copyRefLink()" 
+            class="bg-slate-800 hover:bg-slate-700 text-cyan-400 font-bold px-3 py-2 rounded-xl text-xs transition"
+          >
+            Copy
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="w-full max-w-md text-center py-4 text-xs text-slate-500">
+    <p>© 2026 Nexus Faucet. Minimum withdrawal: 1,000 Satoshis.</p>
+  </footer>
+
+  <script>
+    const BACKEND_API_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
+    let captchaToken = "";
+    let referrerWallet = "";
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      referrerWallet = urlParams.get('ref') || "";
+    });
+
+    function unlockSite(t) {
+      const gate = document.getElementById('entryGate');
+      gate.style.opacity = '0';
+      setTimeout(() => gate.style.display = 'none', 300);
+    }
+
+    function onCaptchaComplete(t) {
+      captchaToken = t;
+    }
+
+    async function checkBalance() {
+      const wallet = document.getElementById('wallet').value.trim();
+      if (!wallet) return;
+
+      const baseUrl = window.location.origin + window.location.pathname;
+      document.getElementById('refLinkInput').value = `${baseUrl}?ref=${wallet}`;
+
+      if (BACKEND_API_URL === "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL") return;
+
+      try {
+        const res = await fetch(BACKEND_API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'balance', wallet: wallet })
+        });
+        const data = await res.json();
+        if (data.success) updateBalanceUI(data.balance);
+      } catch (e) {
+        console.error("Balance fetch error:", e);
+      }
+    }
+
+    function copyRefLink() {
+      const input = document.getElementById('refLinkInput');
+      if (!input.value) return showStatus("Please enter your wallet address first.", "error");
+      input.select();
+      navigator.clipboard.writeText(input.value);
+      showStatus("Referral link copied to clipboard!", "success");
+    }
+
+    async function handleAction(actionType) {
+      const wallet = document.getElementById('wallet').value.trim();
+      const claimBtn = document.getElementById('claimBtn');
+      const withdrawBtn = document.getElementById('withdrawBtn');
+
+      if (!wallet) return showStatus("Please enter your FaucetPay wallet address first.", "error");
+      if (!captchaToken) return showStatus("Please solve the CAPTCHA check.", "error");
+      if (BACKEND_API_URL === "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL") {
+        return showStatus("Backend URL not configured in index.html.", "error");
+      }
+
+      claimBtn.disabled = true;
+      withdrawBtn.disabled = true;
+
+      try {
+        const response = await fetch(BACKEND_API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: actionType,
+            wallet: wallet,
+            referrer: referrerWallet,
+            captchaToken: captchaToken
+          })
+        });
+
+        const data = await response.json();
+
+        claimBtn.disabled = false;
+        withdrawBtn.disabled = false;
+
+        if (data.success) {
+          showStatus(data.message, "success");
+          if (data.balance !== undefined) updateBalanceUI(data.balance);
+        } else {
+          showStatus(data.message, "error");
+        }
+      } catch (err) {
+        claimBtn.disabled = false;
+        withdrawBtn.disabled = false;
+        showStatus("Server request failed. Please check network connection.", "error");
+      } finally {
+        if (window.turnstile) turnstile.reset();
+        captchaToken = "";
+      }
+    }
+
+    function updateBalanceUI(amount) {
+      document.getElementById('balanceDisplay').innerText = `${amount.toLocaleString()} Satoshis`;
+    }
+
+    function showStatus(msg, type) {
+      const box = document.getElementById('statusBox');
+      box.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400', 'bg-red-500/10', 'border-red-500/30', 'text-red-400');
+      box.classList.add(type === 'success' ? 'bg-emerald-500/10' : 'bg-red-500/10');
+      box.classList.add(type === 'success' ? 'border-emerald-500/30' : 'border-red-500/30');
+      box.classList.add(type === 'success' ? 'text-emerald-400' : 'text-red-400');
+      box.innerText = msg;
+      box.classList.remove('hidden');
+    }
+  </script>
+</body>
+  </html>
+        
