@@ -75,10 +75,6 @@
         </p>
       </div>
 
-      <div class="flex justify-center py-2">
-        <div class="cf-turnstile" data-sitekey="0x4AAAAAAElyUDcSuYmcOyg-" data-theme="dark" data-callback="onCaptchaComplete"></div>
-      </div>
-
       <button 
         type="button" 
         onclick="loginUser()" 
@@ -102,7 +98,7 @@
       <div class="grid grid-cols-2 gap-3">
         <button 
           type="button" 
-          onclick="handleAction('claim')" 
+          onclick="openVerificationModal('claim')" 
           id="claimBtn" 
           class="w-full bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 disabled:bg-slate-800 disabled:text-slate-600 font-bold py-3 rounded-xl transition text-slate-950 text-xs uppercase tracking-wider"
         >
@@ -111,7 +107,7 @@
 
         <button 
           type="button" 
-          onclick="handleAction('withdraw')" 
+          onclick="openVerificationModal('withdraw')" 
           id="withdrawBtn" 
           class="w-full bg-slate-800 hover:bg-slate-700 active:bg-slate-800 border border-slate-700 font-bold py-3 rounded-xl transition text-cyan-400 text-xs uppercase tracking-wider"
         >
@@ -143,16 +139,62 @@
     </div>
   </main>
 
+  <!-- ================= SECURITY VERIFICATION MODAL ================= -->
+  <div id="securityModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-4">
+      
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 p-5 text-white flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold border border-white/30">
+          🛡️
+        </div>
+        <div>
+          <h3 class="font-bold text-base">Security Verification</h3>
+          <p class="text-xs text-purple-100">Complete verification to continue</p>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 pt-2 space-y-4 text-center">
+        <p class="text-xs text-slate-300">Please complete the turnstile below.</p>
+        
+        <div class="flex justify-center py-2">
+          <div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITE_KEY" data-theme="dark" data-callback="onCaptchaVerified"></div>
+        </div>
+
+        <div class="flex gap-2">
+          <button 
+            type="button" 
+            onclick="refreshTurnstile()" 
+            class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold py-2.5 rounded-xl text-slate-300 text-xs transition"
+          >
+            Refresh Turnstile
+          </button>
+          
+          <button 
+            type="button" 
+            onclick="closeVerificationModal()" 
+            class="w-full bg-slate-950 hover:bg-slate-800 border border-slate-800 font-bold py-2.5 rounded-xl text-slate-400 text-xs transition"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <footer class="w-full max-w-md text-center py-4 text-xs text-slate-500">
     <p>© 2026 Nexus Faucet. Minimum withdrawal: 1,000 USDT units.</p>
   </footer>
 
   <script>
-    const BACKEND_API_URL = "https://script.google.com/macros/s/AKfycbyEypyuZsVFhKZkDqK8-RfMkSTIuM0PGVZoxzzcr-2tFmpMkDqZg2X8T1sAducBBufOWQ/exec";
+    const BACKEND_API_URL = "https://script.google.com/macros/s/AKfycbw37GtUEZwRdU19Lkjy82N-f_KQUIol8Te189YeYGjFqwPHgqESZk048o8Fa0_vNfiY/exec";
     const COOLDOWN_SECONDS = 300; // 5 minutes
     let captchaToken = "";
     let referrerWallet = "";
     let activeWallet = "";
+    let pendingAction = "";
     let timerInterval = null;
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -166,23 +208,13 @@
       }
     });
 
-    function onCaptchaComplete(t) {
-      captchaToken = t;
-    }
-
-    async function loginUser() {
+    function loginUser() {
       const wallet = document.getElementById('walletInput').value.trim();
-
       if (!wallet) return showStatus("Please enter your FaucetPay wallet address or email.", "error");
-      if (!captchaToken) return showStatus("Please solve the CAPTCHA check.", "error");
 
       activeWallet = wallet;
       localStorage.setItem('nexus_saved_wallet', wallet);
-
       showDashboard();
-      
-      if (window.turnstile) turnstile.reset();
-      captchaToken = "";
     }
 
     function showDashboard() {
@@ -204,8 +236,34 @@
       document.getElementById('loginScreen').classList.remove('hidden');
       document.getElementById('dashboardScreen').classList.add('hidden');
       document.getElementById('balanceContainer').classList.add('hidden');
-      if (window.turnstile) turnstile.reset();
+      closeVerificationModal();
+    }
+
+    function openVerificationModal(actionType) {
+      if (!activeWallet) return showStatus("Please log in first.", "error");
+      pendingAction = actionType;
+      document.getElementById('securityModal').classList.remove('hidden');
+      refreshTurnstile();
+    }
+
+    function closeVerificationModal() {
+      document.getElementById('securityModal').classList.add('hidden');
+      pendingAction = "";
       captchaToken = "";
+    }
+
+    function refreshTurnstile() {
+      captchaToken = "";
+      if (window.turnstile) turnstile.reset();
+    }
+
+    function onCaptchaVerified(token) {
+      captchaToken = token;
+      if (pendingAction) {
+        const actionToExecute = pendingAction;
+        closeVerificationModal();
+        executeAction(actionToExecute, token);
+      }
     }
 
     function checkCooldown() {
@@ -267,12 +325,9 @@
       showStatus("Referral link copied to clipboard!", "success");
     }
 
-    // SPEED-OPTIMIZED HANDLEACTION FUNCTION
-    async function handleAction(actionType) {
+    async function executeAction(actionType, verifiedToken) {
       const claimBtn = document.getElementById('claimBtn');
       const withdrawBtn = document.getElementById('withdrawBtn');
-
-      if (!activeWallet) return showStatus("Please log in first.", "error");
 
       claimBtn.disabled = true;
       withdrawBtn.disabled = true;
@@ -287,7 +342,7 @@
             action: actionType,
             wallet: activeWallet,
             referrer: referrerWallet,
-            captchaToken: "PRE_VERIFIED"
+            captchaToken: verifiedToken
           })
         });
 
@@ -336,5 +391,5 @@
     }
   </script>
 </body>
-        </html>
+            </html>
   
