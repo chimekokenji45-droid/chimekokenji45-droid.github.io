@@ -3,462 +3,954 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Nexus Faucet - Earn & Withdraw USDT</title>
 
-  <!-- Tailwind CSS & Cloudflare Turnstile -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-  <!-- ========================================================= -->
-  <!-- PASTE ADSTERRA SOCIAL BAR / POPUNDER SCRIPT BELOW THIS LINE -->
-  <!-- ========================================================= -->
+  <!-- Cloudflare Turnstile -->
+  <script
+    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+    async
+    defer>
+  </script>
 
-  <!-- ========================================================= -->
-  <!-- PASTE ADSTERRA SOCIAL BAR / POPUNDER SCRIPT ABOVE THIS LINE -->
+  <!-- =========================================================
+       ADSTERRA AD CODE
+       Paste ONLY your approved Adsterra ad code here.
+
+       IMPORTANT:
+       Do NOT connect ads to the CLAIM or WITHDRAW buttons.
+       ========================================================= -->
+
+  <!-- YOUR TOP ADSTERRA CODE HERE -->
+
   <!-- ========================================================= -->
 
   <style>
     body {
-      background: radial-gradient(circle at 50% 0%, #0f172a 0%, #020617 100%);
+      background:
+        radial-gradient(
+          circle at 50% 0%,
+          #0f172a 0%,
+          #020617 100%
+        );
       min-height: 100vh;
+    }
+
+    #securityModal {
+      z-index: 9999;
+    }
+
+    .timer-text {
+      font-variant-numeric: tabular-nums;
     }
   </style>
 </head>
+
 <body class="text-slate-100 flex flex-col items-center justify-between p-4 min-h-screen">
 
-  <!-- HEADER -->
+  <!-- =========================================================
+       HEADER
+       ========================================================= -->
+
   <header class="w-full max-w-md flex items-center justify-between py-4">
+
     <div class="flex items-center gap-2">
-      <div class="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">⚡</div>
-      <div>
-        <h1 class="font-extrabold text-base tracking-tight">NEXUS<span class="text-cyan-400">FAUCET</span></h1>
-        <p class="text-[10px] text-slate-400">Earn & Withdraw USDT to FaucetPay</p>
+
+      <div
+        class="w-9 h-9 rounded-xl bg-cyan-500/20
+               border border-cyan-500/30
+               flex items-center justify-center
+               text-cyan-400 font-bold">
+        ⚡
       </div>
-    </div>
 
-    <!-- BALANCE DISPLAY -->
-    <div id="balanceContainer" class="bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-xl text-right">
-      <div class="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Unclaimed Balance</div>
-      <div id="balanceDisplay" class="text-xs font-black text-cyan-400">0.00000 USDT</div>
-    </div>
-  </header>
-
-  <!-- TOP ADSTERRA BANNER PLACEHOLDER (468x60 / 320x50) -->
-  <div class="w-full max-w-md my-2 flex justify-center items-center overflow-hidden min-h-[60px]">
-    <!-- PASTE ADSTERRA 468x60 or 320x50 BANNER CODE HERE -->
-  </div>
-
-  <!-- MAIN CONTAINER -->
-  <main class="w-full max-w-md space-y-4 my-auto">
-    <div id="statusBox" class="hidden transition-all rounded-xl p-4 border text-xs font-medium text-center"></div>
-
-    <!-- MAIN DASHBOARD CARD -->
-    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-5">
-      
-      <!-- WALLET INPUT -->
       <div>
-        <label for="walletInput" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-          FaucetPay Address / Email
-        </label>
-        <input 
-          type="text" 
-          id="walletInput" 
-          required 
-          placeholder="Enter FaucetPay address or email" 
-          oninput="onWalletChanged()"
-          class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition"
-        />
-        <p class="mt-2 text-center text-[11px] text-slate-400">
-          Don't have an account? 
-          <a href="https://faucetpay.io" target="_blank" rel="noopener noreferrer" class="text-cyan-400 font-bold hover:underline">
-            Create FaucetPay Account
-          </a>
+        <h1 class="font-extrabold text-base tracking-tight">
+          NEXUS<span class="text-cyan-400">FAUCET</span>
+        </h1>
+
+        <p class="text-[10px] text-slate-400">
+          Earn & Withdraw USDT to FaucetPay
         </p>
       </div>
 
-      <!-- SURF ADS MODULE CARD (ADSTERRA POPUP ONLY ON THIS BUTTON) -->
-      <div class="bg-slate-950/80 border border-cyan-500/30 rounded-xl p-4 space-y-3">
-        <div class="flex items-center justify-between">
-          <div class="text-left">
-            <div class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1">
-              <span>🌐</span> Unlimited PTC Surf
-            </div>
-            <div class="text-[10px] text-slate-400">View sponsored ad for 10s to earn reward</div>
-          </div>
-          <span class="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded font-bold">Unlimited</span>
-        </div>
+    </div>
 
-        <button 
-          type="button" 
-          id="surfBtn"
-          onclick="startSurfAd()" 
-          class="w-full bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 disabled:bg-slate-800 disabled:text-slate-600 font-bold py-3 rounded-xl transition text-slate-950 text-xs uppercase tracking-wider flex items-center justify-center gap-2"
-        >
-          <span>🚀</span> Surf Ad (+0.00002 USDT)
-        </button>
+    <!-- BALANCE -->
+
+    <div
+      class="bg-slate-900/80 border border-slate-800
+             px-3 py-1.5 rounded-xl text-right">
+
+      <div
+        class="text-[9px] uppercase tracking-wider
+               text-slate-400 font-bold">
+        Unclaimed Balance
       </div>
 
-      <!-- MIDDLE ADSTERRA NATIVE / BANNER PLACEHOLDER (300x250) -->
-      <div class="w-full flex justify-center items-center overflow-hidden min-h-[100px] border border-slate-800/50 rounded-xl bg-slate-950/50 py-2">
-        <!-- PASTE ADSTERRA NATIVE or 300x250 BANNER CODE HERE -->
-      </div>
-
-      <!-- ACTION BUTTONS (DIRECT ACTION WITHOUT ADSTERRA REDIRECT) -->
-      <div class="grid grid-cols-2 gap-3">
-        <button 
-          type="button" 
-          onclick="openVerificationModal('claim')" 
-          id="claimBtn" 
-          class="w-full bg-slate-800 hover:bg-slate-700 active:bg-slate-800 border border-slate-700 font-bold py-3 rounded-xl transition text-cyan-400 text-xs uppercase tracking-wider"
-        >
-          Claim
-        </button>
-
-        <button 
-          type="button" 
-          onclick="openVerificationModal('withdraw')" 
-          id="withdrawBtn" 
-          class="w-full bg-slate-800 hover:bg-slate-700 active:bg-slate-800 border border-slate-700 font-bold py-3 rounded-xl transition text-slate-300 text-xs uppercase tracking-wider"
-        >
-          Withdraw
-        </button>
-      </div>
-
-      <!-- REFERRAL LINK -->
-      <div class="border-t border-slate-800 pt-4 space-y-2">
-        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
-          Your Referral Link (Earn 20% Commission)
-        </label>
-        <div class="flex gap-2">
-          <input 
-            type="text" 
-            id="refLinkInput" 
-            readonly 
-            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 focus:outline-none"
-          />
-          <button 
-            type="button" 
-            onclick="copyRefLink()" 
-            class="bg-slate-800 hover:bg-slate-700 text-cyan-400 font-bold px-3 py-2 rounded-xl text-xs transition"
-          >
-            Copy
-          </button>
-        </div>
+      <div
+        id="balanceDisplay"
+        class="text-xs font-black text-cyan-400">
+        0.00000 USDT
       </div>
 
     </div>
-  </main>
 
-  <!-- SECURITY VERIFICATION MODAL -->
-  <div id="securityModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-    <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-4">
-      
-      <!-- Modal Header -->
-      <div class="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 p-5 text-white flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold border border-white/30">
-          🛡️
-        </div>
-        <div>
-          <h3 class="font-bold text-base">Security Verification</h3>
-          <p class="text-xs text-purple-100">Complete verification to continue</p>
-        </div>
-      </div>
+  </header>
 
-      <!-- Modal Body -->
-      <div class="p-5 pt-2 space-y-4 text-center">
-        <p class="text-xs text-slate-300">Please solve the CAPTCHA check below to process your request.</p>
-        
-        <div class="flex justify-center py-2">
-          <div class="cf-turnstile" data-sitekey="0x4AAAAAAElyUDcSuYmcOyg-" data-theme="dark" data-callback="onCaptchaVerified"></div>
-        </div>
 
-        <div class="flex gap-2">
-          <button 
-            type="button" 
-            onclick="refreshTurnstile()" 
-            class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold py-2.5 rounded-xl text-slate-300 text-xs transition"
-          >
-            Refresh CAPTCHA
-          </button>
-          
-          <button 
-            type="button" 
-            onclick="closeVerificationModal()" 
-            class="w-full bg-slate-950 hover:bg-slate-800 border border-slate-800 font-bold py-2.5 rounded-xl text-slate-400 text-xs transition"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
+  <!-- =========================================================
+       TOP ADSTERRA AD
+       ========================================================= -->
 
-    </div>
+  <div
+    class="w-full max-w-md my-2
+           flex justify-center items-center
+           overflow-hidden min-h-[60px]">
+
+    <!-- YOUR APPROVED ADSTERRA BANNER / NATIVE CODE HERE -->
+
   </div>
 
-  <footer class="w-full max-w-md text-center py-4 text-xs text-slate-500">
-    <p>© 2026 Nexus Faucet. Minimum withdrawal: 0.005 USDT.</p>
+
+  <!-- =========================================================
+       MAIN
+       ========================================================= -->
+
+  <main class="w-full max-w-md space-y-4 my-auto">
+
+    <!-- STATUS -->
+
+    <div
+      id="statusBox"
+      class="hidden transition-all rounded-xl
+             p-4 border text-xs font-medium text-center">
+    </div>
+
+
+    <!-- =======================================================
+         DASHBOARD
+         ======================================================= -->
+
+    <div
+      class="bg-slate-900/90 border border-slate-800
+             rounded-2xl p-6 shadow-2xl space-y-5">
+
+
+      <!-- =====================================================
+           WALLET
+           ===================================================== -->
+
+      <div>
+
+        <label
+          for="walletInput"
+          class="block text-xs font-bold
+                 uppercase tracking-wider
+                 text-slate-400 mb-2">
+
+          FaucetPay Address / Email
+
+        </label>
+
+        <input
+          type="text"
+          id="walletInput"
+          required
+          autocomplete="off"
+          placeholder="Enter FaucetPay address or email"
+          oninput="onWalletChanged()"
+          class="w-full bg-slate-950
+                 border border-slate-800
+                 rounded-xl px-4 py-3
+                 text-sm text-white
+                 placeholder-slate-500
+                 focus:outline-none
+                 focus:border-cyan-500
+                 transition"
+        />
+
+        <p class="mt-2 text-center text-[11px] text-slate-400">
+
+          Don't have an account?
+
+          <a
+            href="https://faucetpay.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-cyan-400 font-bold hover:underline">
+
+            Create FaucetPay Account
+
+          </a>
+
+        </p>
+
+      </div>
+
+
+      <!-- =====================================================
+           FAUCET CLAIM
+           ===================================================== -->
+
+      <div
+        class="bg-slate-950/80
+               border border-cyan-500/30
+               rounded-xl p-4 space-y-3">
+
+        <div class="flex items-center justify-between">
+
+          <div>
+
+            <div
+              class="text-xs font-bold
+                     text-cyan-400 uppercase
+                     tracking-wider">
+
+              ⚡ Faucet Claim
+
+            </div>
+
+            <div
+              id="claimDescription"
+              class="text-[10px] text-slate-400">
+
+              Complete the security check to claim your reward.
+
+            </div>
+
+          </div>
+
+          <span
+            class="text-[9px]
+                   bg-emerald-500/10
+                   text-emerald-400
+                   border border-emerald-500/30
+                   px-2 py-0.5 rounded font-bold">
+
+            5 MIN
+
+          </span>
+
+        </div>
+
+
+        <button
+          type="button"
+          onclick="openVerificationModal('claim')"
+          id="claimBtn"
+          class="w-full
+                 bg-cyan-500
+                 hover:bg-cyan-400
+                 active:bg-cyan-600
+                 disabled:bg-slate-800
+                 disabled:text-slate-600
+                 font-bold py-3 rounded-xl
+                 transition text-slate-950
+                 text-xs uppercase
+                 tracking-wider">
+
+          ⚡ CLAIM REWARD
+
+        </button>
+
+      </div>
+
+
+      <!-- =====================================================
+           MIDDLE ADSTERRA
+           ===================================================== -->
+
+      <div
+        class="w-full
+               flex justify-center items-center
+               overflow-hidden
+               min-h-[100px]
+               border border-slate-800/50
+               rounded-xl
+               bg-slate-950/50
+               py-2">
+
+        <!-- YOUR APPROVED ADSTERRA BANNER / NATIVE CODE HERE -->
+
+      </div>
+
+
+      <!-- =====================================================
+           WITHDRAW
+           ===================================================== -->
+
+      <button
+        type="button"
+        onclick="openVerificationModal('withdraw')"
+        id="withdrawBtn"
+        class="w-full
+               bg-slate-800
+               hover:bg-slate-700
+               active:bg-slate-800
+               border border-slate-700
+               font-bold py-3
+               rounded-xl
+               transition
+               text-slate-300
+               text-xs uppercase
+               tracking-wider">
+
+        💸 WITHDRAW
+
+      </button>
+
+
+      <!-- =====================================================
+           REFERRAL
+           ===================================================== -->
+
+      <div
+        class="border-t border-slate-800
+               pt-4 space-y-2">
+
+        <label
+          class="block text-[10px]
+                 font-bold uppercase
+                 tracking-wider
+                 text-slate-400">
+
+          Your Referral Link
+          (Earn 20% Commission)
+
+        </label>
+
+        <div class="flex gap-2">
+
+          <input
+            type="text"
+            id="refLinkInput"
+            readonly
+            placeholder="Enter wallet first"
+            class="w-full bg-slate-950
+                   border border-slate-800
+                   rounded-xl px-3 py-2
+                   text-xs text-slate-400
+                   focus:outline-none"
+          />
+
+          <button
+            type="button"
+            onclick="copyRefLink()"
+            class="bg-slate-800
+                   hover:bg-slate-700
+                   text-cyan-400
+                   font-bold px-3 py-2
+                   rounded-xl text-xs transition">
+
+            Copy
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <!-- =========================================================
+       SECURITY MODAL
+       ========================================================= -->
+
+  <div
+    id="securityModal"
+    class="hidden fixed inset-0
+           flex items-center justify-center
+           bg-slate-950/80
+           backdrop-blur-sm p-4">
+
+    <div
+      class="w-full max-w-sm
+             bg-slate-900
+             border border-slate-800
+             rounded-3xl
+             overflow-hidden
+             shadow-2xl">
+
+
+      <!-- MODAL HEADER -->
+
+      <div
+        class="bg-gradient-to-r
+               from-purple-600
+               via-pink-600
+               to-rose-600
+               p-5 text-white
+               flex items-center gap-3">
+
+        <div
+          class="w-10 h-10 rounded-full
+                 bg-white/20
+                 flex items-center justify-center
+                 text-lg font-bold
+                 border border-white/30">
+
+          🛡️
+
+        </div>
+
+        <div>
+
+          <h3 class="font-bold text-base">
+            Security Verification
+          </h3>
+
+          <p class="text-xs text-purple-100">
+            Complete verification to continue
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- MODAL BODY -->
+
+      <div
+        class="p-5 space-y-4 text-center">
+
+        <p
+          id="verificationText"
+          class="text-xs text-slate-300">
+
+          Please complete the security check
+          before continuing.
+
+        </p>
+
+
+        <!-- ===================================================
+             CLOUDFLARE TURNSTILE
+             =================================================== -->
+
+        <div class="flex justify-center py-2">
+
+          <div
+            id="turnstileContainer"
+            class="cf-turnstile"
+            data-sitekey="0x4AAAAAAElyUDcSuYmcOyg-"
+            data-theme="dark"
+            data-callback="onCaptchaVerified"
+            data-expired-callback="onCaptchaExpired"
+            data-error-callback="onCaptchaError">
+          </div>
+
+        </div>
+
+
+        <div
+          id="captchaMessage"
+          class="hidden text-[11px]
+                 text-red-400">
+        </div>
+
+
+        <div class="flex gap-2">
+
+          <button
+            type="button"
+            onclick="refreshTurnstile()"
+            class="w-full
+                   bg-slate-800
+                   hover:bg-slate-700
+                   border border-slate-700
+                   font-bold py-2.5
+                   rounded-xl
+                   text-slate-300
+                   text-xs">
+
+            Refresh
+
+          </button>
+
+          <button
+            type="button"
+            onclick="closeVerificationModal()"
+            class="w-full
+                   bg-slate-950
+                   hover:bg-slate-800
+                   border border-slate-800
+                   font-bold py-2.5
+                   rounded-xl
+                   text-slate-400
+                   text-xs">
+
+            Cancel
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       FOOTER
+       ========================================================= -->
+
+  <footer
+    class="w-full max-w-md
+           text-center py-4
+           text-xs text-slate-500">
+
+    <p>
+      © 2026 Nexus Faucet.
+      Minimum withdrawal: 0.005 USDT.
+    </p>
+
   </footer>
 
-  <script>
-    const BACKEND_API_URL = "https://script.google.com/macros/s/AKfycbxsblSjZEw0XTi5ZZxHsK4qfcGHmINWbCOhiCQYEIcD8zfTkb1MOyf84XUdoMiXLItw/exec";
-    const ADSTERRA_DIRECT_LINK = "https://www.profitableratecpmnetwork.com/wfw1h8t9du?key=0bab42f6ce81699be944bd263cff5860";
 
-    const COOLDOWN_SECONDS = 300; // 5 minutes
+  <!-- =========================================================
+       JAVASCRIPT
+       ========================================================= -->
+
+  <script>
+
+    /* =========================================================
+       CONFIGURATION
+       ========================================================= */
+
+    const BACKEND_API_URL =
+      "https://script.google.com/macros/s/AKfycbxsblSjZEw0XTi5ZZxHsK4qfcGHmINWbCOhiCQYEIcD8zfTkb1MOyf84XUdoMiXLItw/exec";
+
+    const COOLDOWN_SECONDS = 300;
+
+    const MIN_WITHDRAWAL = 0.005;
+
+
+    /* =========================================================
+       STATE
+       ========================================================= */
+
     let captchaToken = "";
     let referrerWallet = "";
     let pendingAction = "";
     let timerInterval = null;
-    let surfTimer = null;
+    let turnstileWidgetId = null;
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      referrerWallet = urlParams.get('ref') || "";
 
-      const savedBalance = localStorage.getItem('nexus_saved_balance');
+    /* =========================================================
+       PAGE START
+       ========================================================= */
+
+    window.addEventListener("DOMContentLoaded", () => {
+
+      const urlParams =
+        new URLSearchParams(window.location.search);
+
+      referrerWallet =
+        urlParams.get("ref") || "";
+
+
+      /* Restore displayed balance */
+
+      const savedBalance =
+        localStorage.getItem("nexus_saved_balance");
+
       if (savedBalance !== null) {
-        updateBalanceUI(parseFloat(savedBalance));
+
+        const parsedBalance =
+          parseFloat(savedBalance);
+
+        if (!isNaN(parsedBalance)) {
+
+          updateBalanceUI(parsedBalance);
+
+        }
+
       }
 
-      const savedWallet = localStorage.getItem('nexus_saved_wallet');
+
+      /* Restore wallet */
+
+      const savedWallet =
+        localStorage.getItem("nexus_saved_wallet");
+
       if (savedWallet) {
-        document.getElementById('walletInput').value = savedWallet;
+
+        const walletInput =
+          document.getElementById("walletInput");
+
+        walletInput.value =
+          savedWallet;
+
         updateRefLink(savedWallet);
+
         fetchBalance(savedWallet);
+
       }
+
+
       checkCooldown();
+
     });
 
-    // SURF AD ENGINE LOGIC (ADSTERRA POPUP EXCLUSIVELY HERE)
-    function startSurfAd() {
-      const wallet = document.getElementById('walletInput').value.trim() || localStorage.getItem('nexus_saved_wallet') || '';
-      if (!wallet) return showStatus("Please enter your FaucetPay wallet address or email.", "error");
 
-      const surfBtn = document.getElementById('surfBtn');
-      surfBtn.disabled = true;
+    /* =========================================================
+       TURNSTILE INITIALIZATION
+       ========================================================= */
 
-      // 1. Instantly trigger Direct Link window open
-      if (ADSTERRA_DIRECT_LINK) {
-        window.open(ADSTERRA_DIRECT_LINK, '_blank');
+    function initializeTurnstile() {
+
+      if (
+        !window.turnstile ||
+        turnstileWidgetId !== null
+      ) {
+
+        return;
+
       }
 
-      // 2. Start timestamp-based 10-second countdown (resilient to tab switches)
-      const durationMs = 10000;
-      const startTime = Date.now();
+      const container =
+        document.getElementById(
+          "turnstileContainer"
+        );
 
-      surfTimer = setInterval(async () => {
-        const elapsed = Date.now() - startTime;
-        const remainingSec = Math.max(0, Math.ceil((durationMs - elapsed) / 1000));
+      if (!container) return;
 
-        surfBtn.innerText = `SURFING... (${remainingSec}s)`;
 
-        if (elapsed >= durationMs) {
-          clearInterval(surfTimer);
-          surfBtn.innerText = "CREDITING REWARD...";
+      try {
 
-          // 3. Send claim request to backend
-          try {
-            const res = await fetch(BACKEND_API_URL, {
-              method: 'POST',
-              body: JSON.stringify({
-                action: 'surf_ad',
-                wallet: wallet,
-                referrer: referrerWallet
-              })
-            });
+        turnstileWidgetId =
+          turnstile.render(
+            container,
+            {
+              sitekey:
+                "0x4AAAAAAElyUDcSuYmcOyg-",
 
-            const data = await res.json();
+              theme:
+                "dark",
 
-            if (data.success) {
-              showStatus(data.message || "Surf Reward credited successfully!", "success");
-              if (data.balance !== undefined) updateBalanceUI(data.balance);
-            } else {
-              showStatus(data.message || "Surf credit failed.", "error");
+              callback:
+                onCaptchaVerified,
+
+              "expired-callback":
+                onCaptchaExpired,
+
+              "error-callback":
+                onCaptchaError
             }
-          } catch (e) {
-            showStatus("Server connection failed during surf verification.", "error");
-          }
+          );
 
-          // 4. Cooloff delay before next surf allowed
-          surfBtn.innerText = "READY IN 3s...";
-          setTimeout(() => {
-            surfBtn.disabled = false;
-            surfBtn.innerText = "🚀 Surf Next Ad (+0.00002 USDT)";
-          }, 3000);
-        }
-      }, 250);
+      } catch (error) {
+
+        console.error(
+          "Turnstile initialization error:",
+          error
+        );
+
+      }
+
     }
+
+
+    /* =========================================================
+       WALLET CHANGE
+       ========================================================= */
 
     function onWalletChanged() {
-      const wallet = document.getElementById('walletInput').value.trim();
-      if (wallet) {
-        localStorage.setItem('nexus_saved_wallet', wallet);
-        updateRefLink(wallet);
-        fetchBalance(wallet);
+
+      const wallet =
+        document.getElementById(
+          "walletInput"
+        ).value.trim();
+
+
+      if (!wallet) {
+
+        document.getElementById(
+          "refLinkInput"
+        ).value = "";
+
+        return;
+
       }
+
+
+      localStorage.setItem(
+        "nexus_saved_wallet",
+        wallet
+      );
+
+
+      updateRefLink(wallet);
+
+      fetchBalance(wallet);
+
     }
+
+
+    /* =========================================================
+       REFERRAL LINK
+       ========================================================= */
 
     function updateRefLink(wallet) {
-      const baseUrl = window.location.origin + window.location.pathname;
-      document.getElementById('refLinkInput').value = `${baseUrl}?ref=${wallet}`;
-    }
 
-    function openVerificationModal(actionType) {
-      const wallet = document.getElementById('walletInput').value.trim();
-      if (!wallet) return showStatus("Please enter your FaucetPay wallet address or email.", "error");
-
-      pendingAction = actionType;
-      document.getElementById('securityModal').classList.remove('hidden');
-      refreshTurnstile();
-    }
-
-    function closeVerificationModal() {
-      document.getElementById('securityModal').classList.add('hidden');
-      pendingAction = "";
-      captchaToken = "";
-    }
-
-    function refreshTurnstile() {
-      captchaToken = "";
-      if (window.turnstile) turnstile.reset();
-    }
-
-    function onCaptchaVerified(token) {
-      captchaToken = token;
-      if (pendingAction) {
-        const actionToExecute = pendingAction;
-        closeVerificationModal();
-        executeAction(actionToExecute, token);
-      }
-    }
-
-    function checkCooldown() {
-      const lastClaim = localStorage.getItem('nexus_last_claim');
-      if (!lastClaim) return;
-
-      const elapsed = Math.floor((Date.now() - parseInt(lastClaim, 10)) / 1000);
-      const remaining = COOLDOWN_SECONDS - elapsed;
-
-      if (remaining > 0) {
-        startTimer(remaining);
-      } else {
-        localStorage.removeItem('nexus_last_claim');
-      }
-    }
-
-    function startTimer(seconds) {
-      const claimBtn = document.getElementById('claimBtn');
-      claimBtn.disabled = true;
-
-      if (timerInterval) clearInterval(timerInterval);
-
-      let timeLeft = seconds;
-      timerInterval = setInterval(() => {
-        const mins = Math.floor(timeLeft / 60);
-        const secs = timeLeft % 60;
-        claimBtn.innerText = `WAIT ${mins}:${secs < 10 ? '0' : ''}${secs}`;
-
-        if (timeLeft <= 0) {
-          clearInterval(timerInterval);
-          claimBtn.disabled = false;
-          claimBtn.innerText = "CLAIM";
-          localStorage.removeItem('nexus_last_claim');
-        }
-        timeLeft--;
-      }, 1000);
-    }
-
-    async function fetchBalance(wallet) {
       if (!wallet) return;
 
-      try {
-        const res = await fetch(BACKEND_API_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'balance', wallet: wallet })
-        });
-        const data = await res.json();
-        if (data.success && data.balance !== undefined) {
-          updateBalanceUI(data.balance);
-        }
-      } catch (e) {
-        console.error("Balance fetch error:", e);
+
+      const baseUrl =
+        window.location.origin +
+        window.location.pathname;
+
+
+      document.getElementById(
+        "refLinkInput"
+      ).value =
+        `${baseUrl}?ref=${encodeURIComponent(wallet)}`;
+
+    }
+
+
+    /* =========================================================
+       COPY REFERRAL LINK
+       ========================================================= */
+
+    async function copyRefLink() {
+
+      const input =
+        document.getElementById(
+          "refLinkInput"
+        );
+
+      const link =
+        input.value.trim();
+
+
+      if (!link) {
+
+        showStatus(
+          "Enter your wallet first to generate a referral link.",
+          "error"
+        );
+
+        return;
+
       }
-    }
 
-    function copyRefLink() {
-      const input = document.getElementById('refLinkInput');
-      if (!input.value) return showStatus("Please enter your wallet address first.", "error");
-      input.select();
-      navigator.clipboard.writeText(input.value);
-      showStatus("Referral link copied to clipboard!", "success");
-    }
-
-    async function executeAction(actionType, verifiedToken) {
-      const wallet = document.getElementById('walletInput').value.trim();
-      const claimBtn = document.getElementById('claimBtn');
-      const withdrawBtn = document.getElementById('withdrawBtn');
-
-      claimBtn.disabled = true;
-      withdrawBtn.disabled = true;
-
-      if (actionType === 'claim') claimBtn.innerText = "CLAIMING...";
-      if (actionType === 'withdraw') withdrawBtn.innerText = "WITHDRAWING...";
 
       try {
-        const response = await fetch(BACKEND_API_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: actionType,
-            wallet: wallet,
-            referrer: referrerWallet,
-            captchaToken: verifiedToken
-          })
-        });
 
-        const data = await response.json();
+        await navigator.clipboard.writeText(
+          link
+        );
 
-        withdrawBtn.disabled = false;
-        withdrawBtn.innerText = "WITHDRAW";
+        showStatus(
+          "Referral link copied.",
+          "success"
+        );
 
-        if (data.success) {
-          showStatus(data.message, "success");
-          if (data.balance !== undefined) updateBalanceUI(data.balance);
+      } catch (error) {
 
-          if (actionType === 'claim') {
-            localStorage.setItem('nexus_last_claim', Date.now().toString());
-            startTimer(COOLDOWN_SECONDS);
-          } else {
-            claimBtn.disabled = false;
-            claimBtn.innerText = "CLAIM";
-          }
-        } else {
-          claimBtn.disabled = false;
-          claimBtn.innerText = "CLAIM";
-          showStatus(data.message, "error");
-        }
-      } catch (err) {
-        claimBtn.disabled = false;
-        withdrawBtn.disabled = false;
-        claimBtn.innerText = "CLAIM";
-        withdrawBtn.innerText = "WITHDRAW";
-        showStatus("Server request failed. Please check network connection.", "error");
+        input.select();
+
+        document.execCommand("copy");
+
+        showStatus(
+          "Referral link copied.",
+          "success"
+        );
+
       }
+
     }
 
-    function updateBalanceUI(amount) {
-      const numAmount = parseFloat(amount) || 0;
-      localStorage.setItem('nexus_saved_balance', numAmount.toString());
-      document.getElementById('balanceDisplay').innerText = `${numAmount.toFixed(5)} USDT`;
+
+    /* =========================================================
+       OPEN SECURITY MODAL
+       ========================================================= */
+
+    function openVerificationModal(actionType) {
+
+      const wallet =
+        document.getElementById(
+          "walletInput"
+        ).value.trim();
+
+
+      if (!wallet) {
+
+        showStatus(
+          "Please enter your FaucetPay wallet address or email.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      /* Claim cooldown */
+
+      if (
+        actionType === "claim" &&
+        isCooldownActive()
+      ) {
+
+        showStatus(
+          "Please wait until your claim cooldown ends.",
+          "error"
+        );
+
+        checkCooldown();
+
+        return;
+
+      }
+
+
+      /* Withdraw balance check */
+
+      if (
+        actionType === "withdraw"
+      ) {
+
+        const balanceText =
+          document.getElementById(
+            "balanceDisplay"
+          ).innerText;
+
+        const balance =
+          parseFloat(
+            balanceText.replace(
+              "USDT",
+              ""
+            ).trim()
+          );
+
+
+        if (
+          !isNaN(balance) &&
+          balance < MIN_WITHDRAWAL
+        ) {
+
+          showStatus(
+            `Minimum withdrawal is ${MIN_WITHDRAWAL.toFixed(3)} USDT.`,
+            "error"
+          );
+
+          return;
+
+        }
+
+      }
+
+
+      pendingAction =
+        actionType;
+
+
+      const modal =
+        document.getElementById(
+          "securityModal"
+        );
+
+      modal.classList.remove(
+        "hidden"
+      );
+
+
+      document.getElementById(
+        "captchaMessage"
+      ).classList.add(
+        "hidden"
+      );
+
+
+      document.getElementById(
+        "verificationText"
+      ).innerText =
+        actionType === "claim"
+          ? "Complete the security check before claiming your reward."
+          : "Complete the security check before submitting your withdrawal.";
+
+
+      setTimeout(() => {
+
+        initializeTurnstile();
+
+        refreshTurnstile();
+
+      }, 300);
+
     }
 
-    function showStatus(msg, type) {
-      const box = document.getElementById('statusBox');
-      box.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400', 'bg-red-500/10', 'border-red-500/30', 'text-red-400');
-      box.classList.add(type === 'success' ? 'bg-emerald-500/10' : 'bg-red-500/10');
-      box.classList.add(type === 'success' ? 'border-emerald-500/30' : 'border-red-500/30');
-      box.classList.add(type === 'success' ? 'text-emerald-400' : 'text-red-400');
-      box.innerText = msg;
-      box.classList.remove('hidden');
+
+    /* =========================================================
+       CLOSE MODAL
+       ========================================================= */
+
+    function closeVerificationModal() {
+
+      document.getElementById(
+        "securityModal"
+      ).classList.add(
+        "hidden"
+      );
+
+
+      pendingAction = "";
+
+      captchaToken = "";
+
     }
-  </script>
-</body>
-  </html>
+
+
+    /* =========================================================
+       TURNSTILE RESET
+       ========================================================= */
+
+    function refreshTurnstile() {
+
+      captchaToken = "";
+
+
+      if (
+        window.turnstile &&
+        turnstileWidgetId !== null
+      ) {
+
+        try {
+
+          turnstile.reset(
+            turnstileWidgetId
+          );
+
+        } catch (error) {
+
+          console.error(
+            "Turnstile reset error:",
+            error
+          );
+
+        }
+
+      }
+
+    }
+
+
+    /* =========================================================
+       TURNSTILE SUCCESS
+       ========================================================= */
+
+    function onCaptchaVerified(token) {
+
+      if (!token) {
   
