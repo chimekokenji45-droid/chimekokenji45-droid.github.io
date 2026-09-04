@@ -9,9 +9,13 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-  <!-- PASTE POPADS CODE BELOW THIS LINE ONCE APPROVED -->
+  <!-- ========================================================= -->
+  <!-- PASTE ADSTERRA SOCIAL BAR / POPUNDER CODE BELOW THIS LINE -->
+  <!-- ========================================================= -->
 
-  <!-- PASTE POPADS CODE ABOVE THIS LINE ONCE APPROVED -->
+  <!-- ========================================================= -->
+  <!-- PASTE ADSTERRA SOCIAL BAR / POPUNDER CODE ABOVE THIS LINE -->
+  <!-- ========================================================= -->
 
   <style>
     body {
@@ -35,9 +39,14 @@
     <!-- BALANCE DISPLAY -->
     <div id="balanceContainer" class="bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-xl text-right">
       <div class="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Unclaimed Balance</div>
-      <div id="balanceDisplay" class="text-xs font-black text-cyan-400">0.0000 USDT</div>
+      <div id="balanceDisplay" class="text-xs font-black text-cyan-400">0.00000 USDT</div>
     </div>
   </header>
+
+  <!-- TOP ADSTERRA BANNER PLACEHOLDER (468x60 / 320x50) -->
+  <div class="w-full max-w-md my-2 flex justify-center items-center overflow-hidden min-h-[60px]">
+    <!-- PASTE ADSTERRA BANNER SCRIPT HERE -->
+  </div>
 
   <!-- MAIN CONTAINER -->
   <main class="w-full max-w-md space-y-4 my-auto">
@@ -67,22 +76,49 @@
         </p>
       </div>
 
+      <!-- SURF ADS MODULE CARD -->
+      <div class="bg-slate-950/80 border border-cyan-500/30 rounded-xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="text-left">
+            <div class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1">
+              <span>🌐</span> Unlimited PTC Surf
+            </div>
+            <div class="text-[10px] text-slate-400">View sponsored ad for 10s to earn reward</div>
+          </div>
+          <span class="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded font-bold">Unlimited</span>
+        </div>
+
+        <button 
+          type="button" 
+          id="surfBtn"
+          onclick="startSurfAd()" 
+          class="w-full bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 disabled:bg-slate-800 disabled:text-slate-600 font-bold py-3 rounded-xl transition text-slate-950 text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+        >
+          <span>🚀</span> Surf Ad (+0.00002 USDT)
+        </button>
+      </div>
+
+      <!-- MIDDLE ADSTERRA NATIVE / BANNER PLACEHOLDER (300x250) -->
+      <div class="w-full flex justify-center items-center overflow-hidden min-h-[100px] border border-slate-800/50 rounded-xl bg-slate-950/50 py-2">
+        <!-- PASTE ADSTERRA NATIVE / 300x250 BANNER SCRIPT HERE -->
+      </div>
+
       <!-- ACTION BUTTONS -->
       <div class="grid grid-cols-2 gap-3">
         <button 
           type="button" 
-          onclick="openVerificationModal('claim')" 
+          onclick="handleAdsterraClick('claim')" 
           id="claimBtn" 
-          class="w-full bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 disabled:bg-slate-800 disabled:text-slate-600 font-bold py-3 rounded-xl transition text-slate-950 text-xs uppercase tracking-wider"
+          class="w-full bg-slate-800 hover:bg-slate-700 active:bg-slate-800 border border-slate-700 font-bold py-3 rounded-xl transition text-cyan-400 text-xs uppercase tracking-wider"
         >
-          Claim Reward
+          Claim
         </button>
 
         <button 
           type="button" 
-          onclick="openVerificationModal('withdraw')" 
+          onclick="handleAdsterraClick('withdraw')" 
           id="withdrawBtn" 
-          class="w-full bg-slate-800 hover:bg-slate-700 active:bg-slate-800 border border-slate-700 font-bold py-3 rounded-xl transition text-cyan-400 text-xs uppercase tracking-wider"
+          class="w-full bg-slate-800 hover:bg-slate-700 active:bg-slate-800 border border-slate-700 font-bold py-3 rounded-xl transition text-slate-300 text-xs uppercase tracking-wider"
         >
           Withdraw
         </button>
@@ -164,11 +200,18 @@
 
   <script>
     const BACKEND_API_URL = "https://script.google.com/macros/s/AKfycbx9uas9CPiZXt-EG7u0kXRBhqtNZnKhhOp4u8UdxgvIk6nb0kqFI9lAoaO3co5bdxCC/exec";
+    
+    // =========================================================
+    // PASTE YOUR ADSTERRA DIRECT LINK / SMARTLINK URL HERE:
+    // =========================================================
+    const ADSTERRA_DIRECT_LINK = "https://www.highrevenuegate.com/YOUR_DIRECT_LINK_KEY_HERE";
+
     const COOLDOWN_SECONDS = 300; // 5 minutes
     let captchaToken = "";
     let referrerWallet = "";
     let pendingAction = "";
     let timerInterval = null;
+    let surfTimer = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -188,6 +231,74 @@
       }
       checkCooldown();
     });
+
+    // SURF AD ENGINE LOGIC
+    function startSurfAd() {
+      const wallet = document.getElementById('walletInput').value.trim() || localStorage.getItem('nexus_saved_wallet') || '';
+      if (!wallet) return showStatus("Please enter your FaucetPay wallet address or email.", "error");
+
+      if (!ADSTERRA_DIRECT_LINK || ADSTERRA_DIRECT_LINK.includes("YOUR_DIRECT_LINK_KEY_HERE")) {
+        return showStatus("Please insert your Adsterra Direct Link in index.html.", "error");
+      }
+
+      const surfBtn = document.getElementById('surfBtn');
+      surfBtn.disabled = true;
+
+      // 1. Open Adsterra Direct Link in a new tab
+      window.open(ADSTERRA_DIRECT_LINK, '_blank');
+
+      // 2. Start 10-second timer countdown
+      let timeLeft = 10;
+      surfBtn.innerText = `SURFING... (${timeLeft}s)`;
+
+      surfTimer = setInterval(async () => {
+        timeLeft--;
+        surfBtn.innerText = `SURFING... (${timeLeft}s)`;
+
+        if (timeLeft <= 0) {
+          clearInterval(surfTimer);
+          surfBtn.innerText = "CREDITING REWARD...";
+
+          // 3. Send claim request to backend
+          try {
+            const res = await fetch(BACKEND_API_URL, {
+              method: 'POST',
+              body: JSON.stringify({
+                action: 'surf_ad',
+                wallet: wallet,
+                referrer: referrerWallet
+              })
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+              showStatus(data.message || "Surf Reward credited successfully!", "success");
+              if (data.balance !== undefined) updateBalanceUI(data.balance);
+            } else {
+              showStatus(data.message || "Surf credit failed.", "error");
+            }
+          } catch (e) {
+            showStatus("Server connection failed during surf verification.", "error");
+          }
+
+          // 4. Brief 3-second cooloff before next surf
+          surfBtn.innerText = "READY IN 3s...";
+          setTimeout(() => {
+            surfBtn.disabled = false;
+            surfBtn.innerText = "🚀 Surf Next Ad (+0.00002 USDT)";
+          }, 3000);
+        }
+      }, 1000);
+    }
+
+    // TRIGGER ADSTERRA DIRECT LINK ON CLAIM/WITHDRAW BUTTON CLICK
+    function handleAdsterraClick(actionType) {
+      if (ADSTERRA_DIRECT_LINK && !ADSTERRA_DIRECT_LINK.includes("YOUR_DIRECT_LINK_KEY_HERE")) {
+        window.open(ADSTERRA_DIRECT_LINK, '_blank');
+      }
+      openVerificationModal(actionType);
+    }
 
     function onWalletChanged() {
       const wallet = document.getElementById('walletInput').value.trim();
@@ -261,7 +372,7 @@
         if (timeLeft <= 0) {
           clearInterval(timerInterval);
           claimBtn.disabled = false;
-          claimBtn.innerText = "CLAIM REWARD";
+          claimBtn.innerText = "CLAIM";
           localStorage.removeItem('nexus_last_claim');
         }
         timeLeft--;
@@ -329,17 +440,17 @@
             startTimer(COOLDOWN_SECONDS);
           } else {
             claimBtn.disabled = false;
-            claimBtn.innerText = "CLAIM REWARD";
+            claimBtn.innerText = "CLAIM";
           }
         } else {
           claimBtn.disabled = false;
-          claimBtn.innerText = "CLAIM REWARD";
+          claimBtn.innerText = "CLAIM";
           showStatus(data.message, "error");
         }
       } catch (err) {
         claimBtn.disabled = false;
         withdrawBtn.disabled = false;
-        claimBtn.innerText = "CLAIM REWARD";
+        claimBtn.innerText = "CLAIM";
         withdrawBtn.innerText = "WITHDRAW";
         showStatus("Server request failed. Please check network connection.", "error");
       }
@@ -348,7 +459,7 @@
     function updateBalanceUI(amount) {
       const numAmount = parseFloat(amount) || 0;
       localStorage.setItem('nexus_saved_balance', numAmount.toString());
-      document.getElementById('balanceDisplay').innerText = `${numAmount.toFixed(4)} USDT`;
+      document.getElementById('balanceDisplay').innerText = `${numAmount.toFixed(5)} USDT`;
     }
 
     function showStatus(msg, type) {
@@ -362,5 +473,5 @@
     }
   </script>
 </body>
-          </html>
+  </html>
   
