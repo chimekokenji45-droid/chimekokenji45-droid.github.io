@@ -10,11 +10,11 @@
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <!-- ========================================================= -->
-  <!-- PASTE ADSTERRA SOCIAL BAR / POPUNDER CODE BELOW THIS LINE -->
+  <!-- PASTE ADSTERRA SOCIAL BAR / POPUNDER SCRIPT BELOW THIS LINE -->
   <!-- ========================================================= -->
 
   <!-- ========================================================= -->
-  <!-- PASTE ADSTERRA SOCIAL BAR / POPUNDER CODE ABOVE THIS LINE -->
+  <!-- PASTE ADSTERRA SOCIAL BAR / POPUNDER SCRIPT ABOVE THIS LINE -->
   <!-- ========================================================= -->
 
   <style>
@@ -45,7 +45,7 @@
 
   <!-- TOP ADSTERRA BANNER PLACEHOLDER (468x60 / 320x50) -->
   <div class="w-full max-w-md my-2 flex justify-center items-center overflow-hidden min-h-[60px]">
-    <!-- PASTE ADSTERRA BANNER SCRIPT HERE -->
+    <!-- PASTE ADSTERRA 468x60 or 320x50 BANNER CODE HERE -->
   </div>
 
   <!-- MAIN CONTAINER -->
@@ -100,7 +100,7 @@
 
       <!-- MIDDLE ADSTERRA NATIVE / BANNER PLACEHOLDER (300x250) -->
       <div class="w-full flex justify-center items-center overflow-hidden min-h-[100px] border border-slate-800/50 rounded-xl bg-slate-950/50 py-2">
-        <!-- PASTE ADSTERRA NATIVE / 300x250 BANNER SCRIPT HERE -->
+        <!-- PASTE ADSTERRA NATIVE or 300x250 BANNER CODE HERE -->
       </div>
 
       <!-- ACTION BUTTONS -->
@@ -200,10 +200,6 @@
 
   <script>
     const BACKEND_API_URL = "https://script.google.com/macros/s/AKfycbxsblSjZEw0XTi5ZZxHsK4qfcGHmINWbCOhiCQYEIcD8zfTkb1MOyf84XUdoMiXLItw/exec";
-    
-    // =========================================================
-    // PASTE YOUR ADSTERRA DIRECT LINK / SMARTLINK URL HERE:
-    // =========================================================
     const ADSTERRA_DIRECT_LINK = "https://www.profitableratecpmnetwork.com/wfw1h8t9du?key=0bab42f6ce81699be944bd263cff5860";
 
     const COOLDOWN_SECONDS = 300; // 5 minutes
@@ -217,7 +213,6 @@
       const urlParams = new URLSearchParams(window.location.search);
       referrerWallet = urlParams.get('ref') || "";
 
-      // Instantly load cached balance from localStorage on page refresh
       const savedBalance = localStorage.getItem('nexus_saved_balance');
       if (savedBalance !== null) {
         updateBalanceUI(parseFloat(savedBalance));
@@ -232,30 +227,30 @@
       checkCooldown();
     });
 
-    // SURF AD ENGINE LOGIC
+    // SURF AD ENGINE LOGIC (TIMESTAMP-ACCURATE BACKGROUND TIMER)
     function startSurfAd() {
       const wallet = document.getElementById('walletInput').value.trim() || localStorage.getItem('nexus_saved_wallet') || '';
       if (!wallet) return showStatus("Please enter your FaucetPay wallet address or email.", "error");
 
-      if (!ADSTERRA_DIRECT_LINK || ADSTERRA_DIRECT_LINK.includes("YOUR_DIRECT_LINK_KEY_HERE")) {
-        return showStatus("Please insert your Adsterra Direct Link in index.html.", "error");
-      }
-
       const surfBtn = document.getElementById('surfBtn');
       surfBtn.disabled = true;
 
-      // 1. Open Adsterra Direct Link in a new tab
-      window.open(ADSTERRA_DIRECT_LINK, '_blank');
+      // 1. Instantly trigger Direct Link window open
+      if (ADSTERRA_DIRECT_LINK) {
+        window.open(ADSTERRA_DIRECT_LINK, '_blank');
+      }
 
-      // 2. Start 10-second timer countdown
-      let timeLeft = 10;
-      surfBtn.innerText = `SURFING... (${timeLeft}s)`;
+      // 2. Start timestamp-based 10-second countdown (resilient to tab switches)
+      const durationMs = 10000;
+      const startTime = Date.now();
 
       surfTimer = setInterval(async () => {
-        timeLeft--;
-        surfBtn.innerText = `SURFING... (${timeLeft}s)`;
+        const elapsed = Date.now() - startTime;
+        const remainingSec = Math.max(0, Math.ceil((durationMs - elapsed) / 1000));
 
-        if (timeLeft <= 0) {
+        surfBtn.innerText = `SURFING... (${remainingSec}s)`;
+
+        if (elapsed >= durationMs) {
           clearInterval(surfTimer);
           surfBtn.innerText = "CREDITING REWARD...";
 
@@ -282,19 +277,19 @@
             showStatus("Server connection failed during surf verification.", "error");
           }
 
-          // 4. Brief 3-second cooloff before next surf
+          // 4. Cooloff delay before next surf allowed
           surfBtn.innerText = "READY IN 3s...";
           setTimeout(() => {
             surfBtn.disabled = false;
             surfBtn.innerText = "🚀 Surf Next Ad (+0.00002 USDT)";
           }, 3000);
         }
-      }, 1000);
+      }, 250);
     }
 
     // TRIGGER ADSTERRA DIRECT LINK ON CLAIM/WITHDRAW BUTTON CLICK
     function handleAdsterraClick(actionType) {
-      if (ADSTERRA_DIRECT_LINK && !ADSTERRA_DIRECT_LINK.includes("YOUR_DIRECT_LINK_KEY_HERE")) {
+      if (ADSTERRA_DIRECT_LINK) {
         window.open(ADSTERRA_DIRECT_LINK, '_blank');
       }
       openVerificationModal(actionType);
@@ -474,4 +469,4 @@
   </script>
 </body>
   </html>
-  
+                                                             
