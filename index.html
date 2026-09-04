@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nexus Faucet - Earn & Withdraw Satoshi</title>
+  <title>Nexus Faucet - Earn & Withdraw USDT</title>
 
   <!-- Tailwind CSS & Cloudflare Turnstile -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -28,14 +28,14 @@
       <div class="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">⚡</div>
       <div>
         <h1 class="font-extrabold text-base tracking-tight">NEXUS<span class="text-cyan-400">FAUCET</span></h1>
-        <p class="text-[10px] text-slate-400">Earn & Withdraw Satoshi to FaucetPay</p>
+        <p class="text-[10px] text-slate-400">Earn & Withdraw USDT to FaucetPay</p>
       </div>
     </div>
 
     <!-- BALANCE DISPLAY -->
     <div id="balanceContainer" class="bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-xl text-right">
       <div class="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Unclaimed Balance</div>
-      <div id="balanceDisplay" class="text-xs font-black text-cyan-400">0 Satoshi</div>
+      <div id="balanceDisplay" class="text-xs font-black text-cyan-400">0.0000 USDT</div>
     </div>
   </header>
 
@@ -159,7 +159,7 @@
   </div>
 
   <footer class="w-full max-w-md text-center py-4 text-xs text-slate-500">
-    <p>© 2026 Nexus Faucet. Minimum withdrawal: 1,000 Satoshi.</p>
+    <p>© 2026 Nexus Faucet. Minimum withdrawal: 0.001 USDT.</p>
   </footer>
 
   <script>
@@ -177,7 +177,7 @@
       // Instantly load cached balance from localStorage on page refresh
       const savedBalance = localStorage.getItem('nexus_saved_balance');
       if (savedBalance !== null) {
-        updateBalanceUI(parseInt(savedBalance, 10));
+        updateBalanceUI(parseFloat(savedBalance));
       }
 
       const savedWallet = localStorage.getItem('nexus_saved_wallet');
@@ -346,9 +346,9 @@
     }
 
     function updateBalanceUI(amount) {
-      const numAmount = parseInt(amount, 10) || 0;
+      const numAmount = parseFloat(amount) || 0;
       localStorage.setItem('nexus_saved_balance', numAmount.toString());
-      document.getElementById('balanceDisplay').innerText = `${numAmount.toLocaleString()} Satoshi`;
+      document.getElementById('balanceDisplay').innerText = `${numAmount.toFixed(4)} USDT`;
     }
 
     function showStatus(msg, type) {
@@ -362,5 +362,5 @@
     }
   </script>
 </body>
-        </html>
-          
+          </html>
+        
