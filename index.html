@@ -76,7 +76,7 @@
         </p>
       </div>
 
-      <!-- SURF ADS MODULE CARD -->
+      <!-- SURF ADS MODULE CARD (ADSTERRA POPUP ONLY ON THIS BUTTON) -->
       <div class="bg-slate-950/80 border border-cyan-500/30 rounded-xl p-4 space-y-3">
         <div class="flex items-center justify-between">
           <div class="text-left">
@@ -103,11 +103,11 @@
         <!-- PASTE ADSTERRA NATIVE or 300x250 BANNER CODE HERE -->
       </div>
 
-      <!-- ACTION BUTTONS -->
+      <!-- ACTION BUTTONS (DIRECT ACTION WITHOUT ADSTERRA REDIRECT) -->
       <div class="grid grid-cols-2 gap-3">
         <button 
           type="button" 
-          onclick="handleAdsterraClick('claim')" 
+          onclick="openVerificationModal('claim')" 
           id="claimBtn" 
           class="w-full bg-slate-800 hover:bg-slate-700 active:bg-slate-800 border border-slate-700 font-bold py-3 rounded-xl transition text-cyan-400 text-xs uppercase tracking-wider"
         >
@@ -116,7 +116,7 @@
 
         <button 
           type="button" 
-          onclick="handleAdsterraClick('withdraw')" 
+          onclick="openVerificationModal('withdraw')" 
           id="withdrawBtn" 
           class="w-full bg-slate-800 hover:bg-slate-700 active:bg-slate-800 border border-slate-700 font-bold py-3 rounded-xl transition text-slate-300 text-xs uppercase tracking-wider"
         >
@@ -227,7 +227,7 @@
       checkCooldown();
     });
 
-    // SURF AD ENGINE LOGIC (TIMESTAMP-ACCURATE BACKGROUND TIMER)
+    // SURF AD ENGINE LOGIC (ADSTERRA POPUP EXCLUSIVELY HERE)
     function startSurfAd() {
       const wallet = document.getElementById('walletInput').value.trim() || localStorage.getItem('nexus_saved_wallet') || '';
       if (!wallet) return showStatus("Please enter your FaucetPay wallet address or email.", "error");
@@ -285,14 +285,6 @@
           }, 3000);
         }
       }, 250);
-    }
-
-    // TRIGGER ADSTERRA DIRECT LINK ON CLAIM/WITHDRAW BUTTON CLICK
-    function handleAdsterraClick(actionType) {
-      if (ADSTERRA_DIRECT_LINK) {
-        window.open(ADSTERRA_DIRECT_LINK, '_blank');
-      }
-      openVerificationModal(actionType);
     }
 
     function onWalletChanged() {
@@ -469,4 +461,4 @@
   </script>
 </body>
   </html>
-                                                             
+  
