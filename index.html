@@ -849,3 +849,1172 @@
       </p>
 
   </section>
+    <!-- =======================================================
+         FINAL INFORMATION
+         ======================================================= -->
+
+    <section class="content-card text-center">
+
+      <h2>Nexus Faucet</h2>
+
+      <p>
+        Earn small USDT faucet rewards, build your balance,
+        and withdraw through FaucetPay when you reach the
+        minimum withdrawal requirement.
+      </p>
+
+      <p class="mt-2 text-[10px]">
+        Faucet rewards are subject to availability,
+        security verification, and the platform rules.
+      </p>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================================================
+       SECURITY VERIFICATION MODAL
+       ========================================================= -->
+
+  <div
+    id="verificationModal"
+    class="fixed inset-0
+           bg-black/80
+           backdrop-blur-sm
+           hidden
+           items-center
+           justify-center
+           p-4
+           z-50">
+
+    <div
+      class="w-full max-w-sm
+             bg-slate-900
+             border border-slate-700
+             rounded-2xl
+             p-6
+             shadow-2xl">
+
+      <div class="text-center">
+
+        <div
+          class="mx-auto
+                 w-12 h-12
+                 rounded-xl
+                 bg-cyan-500/10
+                 border border-cyan-500/30
+                 flex items-center
+                 justify-center
+                 text-2xl">
+
+          🛡️
+
+        </div>
+
+        <h2
+          class="mt-4
+                 text-lg
+                 font-black">
+
+          Security Verification
+
+        </h2>
+
+        <p
+          class="mt-2
+                 text-xs
+                 text-slate-400">
+
+          Complete the verification below to continue.
+
+        </p>
+
+      </div>
+
+
+      <!-- TURNSTILE -->
+
+      <div
+        class="mt-5
+               flex justify-center">
+
+        <div
+          class="cf-turnstile"
+          data-sitekey="0x4AAAAAAElyUDcSuYmcOyg-"
+          data-callback="onCaptchaVerified"
+          data-expired-callback="onCaptchaExpired"
+          data-error-callback="onCaptchaError">
+        </div>
+
+      </div>
+
+
+      <button
+        type="button"
+        onclick="closeVerificationModal()"
+        class="w-full
+               mt-5
+               bg-slate-800
+               hover:bg-slate-700
+               border border-slate-700
+               rounded-xl
+               py-3
+               text-xs
+               font-bold
+               text-slate-300
+               transition">
+
+        CANCEL
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       FOOTER
+       ========================================================= -->
+
+  <footer
+    class="w-full max-w-md
+           text-center
+           py-6
+           mt-6">
+
+    <div
+      class="border-t
+             border-slate-800
+             pt-5">
+
+      <p
+        class="text-[10px]
+               text-slate-500">
+
+        © 2026 Nexus Faucet.
+        All rights reserved.
+
+      </p>
+
+      <p
+        class="mt-1
+               text-[9px]
+               text-slate-600">
+
+        USDT faucet rewards powered by Nexus Faucet.
+
+      </p>
+
+    </div>
+
+  </footer>
+
+
+  <!-- =========================================================
+       JAVASCRIPT
+       ========================================================= -->
+
+  <script>
+
+    // ==========================================================
+    // CONFIGURATION
+    // ==========================================================
+
+    const BACKEND_API_URL =
+      "https://script.google.com/macros/s/AKfycbxsblSjZEw0XTi5ZZxHsK4qfcGHmINWbCOhiCQYEIcD8zfTkb1MOyf84XUdoMiXLItw/exec";
+
+    const CLAIM_AMOUNT = 0.0001;
+
+    const COOLDOWN_SECONDS = 300;
+
+
+    // ==========================================================
+    // STATE
+    // ==========================================================
+
+    let captchaToken = "";
+
+    let referrerWallet = "";
+
+    let pendingAction = "";
+
+    let timerInterval = null;
+
+
+    // ==========================================================
+    // PAGE INITIALIZATION
+    // ==========================================================
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      function () {
+
+        const savedWallet =
+          localStorage.getItem("nexus_wallet") || "";
+
+        const savedBalance =
+          localStorage.getItem("nexus_balance");
+
+
+        if (savedWallet) {
+
+          document.getElementById("walletInput").value =
+            savedWallet;
+
+          updateReferralLink();
+
+        }
+
+
+        if (savedBalance !== null) {
+
+          updateBalanceUI(
+            parseFloat(savedBalance) || 0
+          );
+
+        }
+
+
+        const params =
+          new URLSearchParams(
+            window.location.search
+          );
+
+        const ref =
+          params.get("ref");
+
+
+        if (ref) {
+
+          referrerWallet =
+            ref.trim();
+
+          localStorage.setItem(
+            "nexus_referrer",
+            referrerWallet
+          );
+
+        } else {
+
+          referrerWallet =
+            localStorage.getItem(
+              "nexus_referrer"
+            ) || "";
+
+        }
+
+
+        if (savedWallet) {
+
+          fetchBalance();
+
+          checkLocalCooldown();
+
+        }
+
+      }
+    );
+
+
+    // ==========================================================
+    // WALLET CHANGE
+    // ==========================================================
+
+    function onWalletChanged() {
+
+      const wallet =
+        document.getElementById(
+          "walletInput"
+        ).value.trim();
+
+
+      localStorage.setItem(
+        "nexus_wallet",
+        wallet
+      );
+
+
+      updateReferralLink();
+
+
+      if (wallet) {
+
+        fetchBalance();
+
+        checkLocalCooldown();
+
+      }
+
+    }
+
+
+    // ==========================================================
+    // REFERRAL LINK
+    // ==========================================================
+
+    function updateReferralLink() {
+
+      const wallet =
+        document.getElementById(
+          "walletInput"
+        ).value.trim();
+
+
+      const input =
+        document.getElementById(
+          "refLinkInput"
+        );
+
+
+      if (!input) return;
+
+
+      if (!wallet) {
+
+        input.value = "";
+
+        return;
+
+      }
+
+
+      input.value =
+        window.location.origin +
+        window.location.pathname +
+        "?ref=" +
+        encodeURIComponent(wallet);
+
+    }
+
+
+    // ==========================================================
+    // COPY REFERRAL LINK
+    // ==========================================================
+
+    async function copyRefLink() {
+
+      const input =
+        document.getElementById(
+          "refLinkInput"
+        );
+
+
+      if (!input.value) {
+
+        showStatus(
+          "Enter your FaucetPay address or email first.",
+          false
+        );
+
+        return;
+
+      }
+
+
+      try {
+
+        await navigator.clipboard.writeText(
+          input.value
+        );
+
+        showStatus(
+          "Referral link copied successfully.",
+          true
+        );
+
+      } catch (error) {
+
+        input.select();
+
+        document.execCommand("copy");
+
+        showStatus(
+          "Referral link copied successfully.",
+          true
+        );
+
+      }
+
+    }
+
+
+    // ==========================================================
+    // BALANCE
+    // ==========================================================
+
+    async function fetchBalance() {
+
+      const wallet =
+        document.getElementById(
+          "walletInput"
+        ).value.trim();
+
+
+      if (!wallet) return;
+
+
+      try {
+
+        const response =
+          await fetch(
+            BACKEND_API_URL,
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "text/plain;charset=utf-8"
+              },
+
+              body: JSON.stringify({
+
+                action: "balance",
+
+                wallet: wallet
+
+              })
+
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (data.success) {
+
+          updateBalanceUI(
+            Number(data.balance) || 0
+          );
+
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Balance request failed:",
+          error
+        );
+
+      }
+
+    }
+
+
+    // ==========================================================
+    // BALANCE UI
+    // ==========================================================
+
+    function updateBalanceUI(balance) {
+
+      const safeBalance =
+        Number(balance) || 0;
+
+
+      document.getElementById(
+        "balanceDisplay"
+      ).textContent =
+        safeBalance.toFixed(6) +
+        " USDT";
+
+
+      localStorage.setItem(
+        "nexus_balance",
+        safeBalance.toFixed(6)
+      );
+
+    }
+
+
+    // ==========================================================
+    // OPEN VERIFICATION MODAL
+    // ==========================================================
+
+    function openVerificationModal(action) {
+
+      const wallet =
+        document.getElementById(
+          "walletInput"
+        ).value.trim();
+
+
+      if (!wallet) {
+
+        showStatus(
+          "Please enter your FaucetPay address or email first.",
+          false
+        );
+
+        document.getElementById(
+          "walletInput"
+        ).focus();
+
+        return;
+
+      }
+
+
+      if (
+        action === "claim" &&
+        isCooldownActive()
+      ) {
+
+        showStatus(
+          getCooldownMessage(),
+          false
+        );
+
+        return;
+
+      }
+
+
+      pendingAction = action;
+
+      captchaToken = "";
+
+
+      const modal =
+        document.getElementById(
+          "verificationModal"
+        );
+
+
+      modal.classList.remove("hidden");
+
+      modal.classList.add("flex");
+
+
+      setTimeout(
+        function () {
+
+          try {
+
+            if (
+              typeof turnstile !==
+              "undefined"
+            ) {
+
+              turnstile.reset();
+
+            }
+
+          } catch (error) {
+
+            console.error(error);
+
+          }
+
+        },
+        100
+      );
+
+    }
+
+
+    // ==========================================================
+    // CLOSE MODAL
+    // ==========================================================
+
+    function closeVerificationModal() {
+
+      const modal =
+        document.getElementById(
+          "verificationModal"
+        );
+
+
+      modal.classList.add("hidden");
+
+      modal.classList.remove("flex");
+
+
+      pendingAction = "";
+
+      captchaToken = "";
+
+
+      try {
+
+        if (
+          typeof turnstile !==
+          "undefined"
+        ) {
+
+          turnstile.reset();
+
+        }
+
+      } catch (error) {}
+
+    }
+
+
+    // ==========================================================
+    // CAPTCHA VERIFIED
+    // ==========================================================
+
+    function onCaptchaVerified(token) {
+
+      captchaToken = token;
+
+
+      if (pendingAction) {
+
+        executeAction(
+          pendingAction
+        );
+
+      }
+
+    }
+
+
+    // ==========================================================
+    // CAPTCHA EXPIRED
+    // ==========================================================
+
+    function onCaptchaExpired() {
+
+      captchaToken = "";
+
+      showStatus(
+        "Security verification expired. Please verify again.",
+        false
+      );
+
+    }
+
+
+    // ==========================================================
+    // CAPTCHA ERROR
+    // ==========================================================
+
+    function onCaptchaError() {
+
+      captchaToken = "";
+
+      showStatus(
+        "Security verification could not be completed.",
+        false
+      );
+
+    }
+
+
+    // ==========================================================
+    // EXECUTE ACTION
+    // ==========================================================
+
+    async function executeAction(action) {
+
+      if (!captchaToken) {
+
+        showStatus(
+          "Please complete the security verification.",
+          false
+        );
+
+        return;
+
+      }
+
+
+      const wallet =
+        document.getElementById(
+          "walletInput"
+        ).value.trim();
+
+
+      if (!wallet) {
+
+        closeVerificationModal();
+
+        showStatus(
+          "Please enter your FaucetPay address or email.",
+          false
+        );
+
+        return;
+
+      }
+
+
+      const referrer =
+        referrerWallet ||
+        localStorage.getItem(
+          "nexus_referrer"
+        ) ||
+        "";
+
+
+      const button =
+        action === "claim"
+          ? document.getElementById("claimBtn")
+          : document.getElementById("withdrawBtn");
+
+
+      if (button) {
+
+        button.disabled = true;
+
+      }
+
+
+      showStatus(
+        action === "claim"
+          ? "Processing your faucet claim..."
+          : "Processing your withdrawal...",
+        true
+      );
+
+
+      try {
+
+        const response =
+          await fetch(
+            BACKEND_API_URL,
+            {
+
+              method: "POST",
+
+              headers: {
+
+                "Content-Type":
+                  "text/plain;charset=utf-8"
+
+              },
+
+              body: JSON.stringify({
+
+                action: action,
+
+                wallet: wallet,
+
+                referrer: referrer,
+
+                captchaToken: captchaToken
+
+              })
+
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (data.success) {
+
+          updateBalanceUI(
+            Number(data.balance) || 0
+          );
+
+
+          if (action === "claim") {
+
+            localStorage.setItem(
+              "nexus_last_claim",
+              Date.now().toString()
+            );
+
+
+            startCooldown();
+
+          }
+
+
+          showStatus(
+            data.message ||
+              "Operation completed successfully.",
+            true
+          );
+
+
+          closeVerificationModal();
+
+        } else {
+
+          showStatus(
+            data.message ||
+              "The request could not be completed.",
+            false
+          );
+
+
+          if (
+            typeof data.balance !==
+            "undefined"
+          ) {
+
+            updateBalanceUI(
+              Number(data.balance) || 0
+            );
+
+          }
+
+
+          closeVerificationModal();
+
+        }
+
+
+      } catch (error) {
+
+        console.error(
+          "API request failed:",
+          error
+        );
+
+
+        showStatus(
+          "Unable to contact the server. Please try again.",
+          false
+        );
+
+      } finally {
+
+        if (button) {
+
+          button.disabled = false;
+
+        }
+
+        captchaToken = "";
+
+      }
+
+    }
+
+
+    // ==========================================================
+    // LOCAL COOLDOWN
+    // ==========================================================
+
+    function isCooldownActive() {
+
+      const lastClaim =
+        parseInt(
+          localStorage.getItem(
+            "nexus_last_claim"
+          ) || "0",
+          10
+        );
+
+
+      if (!lastClaim) {
+
+        return false;
+
+      }
+
+
+      return (
+        Date.now() - lastClaim <
+        COOLDOWN_SECONDS * 1000
+      );
+
+    }
+
+
+    function getCooldownRemaining() {
+
+      const lastClaim =
+        parseInt(
+          localStorage.getItem(
+            "nexus_last_claim"
+          ) || "0",
+          10
+        );
+
+
+      if (!lastClaim) {
+
+        return 0;
+
+      }
+
+
+      const remaining =
+        COOLDOWN_SECONDS * 1000 -
+        (Date.now() - lastClaim);
+
+
+      return Math.max(
+        0,
+        Math.ceil(
+          remaining / 1000
+        )
+      );
+
+    }
+
+
+    function getCooldownMessage() {
+
+      const remaining =
+        getCooldownRemaining();
+
+
+      const minutes =
+        Math.floor(
+          remaining / 60
+        );
+
+
+      const seconds =
+        remaining % 60;
+
+
+      return (
+        "Cooldown active. Please wait " +
+        minutes +
+        " minute(s) and " +
+        seconds +
+        " second(s)."
+      );
+
+    }
+
+
+    // ==========================================================
+    // START COOLDOWN TIMER
+    // ==========================================================
+
+    function startCooldown() {
+
+      if (timerInterval) {
+
+        clearInterval(
+          timerInterval
+        );
+
+      }
+
+
+      const button =
+        document.getElementById(
+          "claimBtn"
+        );
+
+
+      if (!button) return;
+
+
+      function update() {
+
+        const remaining =
+          getCooldownRemaining();
+
+
+        if (remaining <= 0) {
+
+          clearInterval(
+            timerInterval
+          );
+
+          timerInterval = null;
+
+          button.disabled = false;
+
+          button.textContent =
+            "⚡ CLAIM REWARD";
+
+          return;
+
+        }
+
+
+        const minutes =
+          Math.floor(
+            remaining / 60
+          );
+
+
+        const seconds =
+          remaining % 60;
+
+
+        button.disabled = true;
+
+
+        button.textContent =
+          "WAIT " +
+          minutes +
+          ":" +
+          String(seconds)
+            .padStart(2, "0");
+
+      }
+
+
+      update();
+
+
+      timerInterval =
+        setInterval(
+          update,
+          1000
+        );
+
+    }
+
+
+    // ==========================================================
+    // CHECK LOCAL COOLDOWN
+    // ==========================================================
+
+    function checkLocalCooldown() {
+
+      if (isCooldownActive()) {
+
+        startCooldown();
+
+      } else {
+
+        const button =
+          document.getElementById(
+            "claimBtn"
+          );
+
+
+        if (button) {
+
+          button.disabled = false;
+
+          button.textContent =
+            "⚡ CLAIM REWARD";
+
+        }
+
+      }
+
+    }
+
+
+    // ==========================================================
+    // STATUS MESSAGE
+    // ==========================================================
+
+    function showStatus(
+      message,
+      success
+    ) {
+
+      const box =
+        document.getElementById(
+          "statusBox"
+        );
+
+
+      if (!box) return;
+
+
+      box.classList.remove(
+        "hidden"
+      );
+
+
+      box.textContent =
+        message;
+
+
+      box.classList.remove(
+
+        "border-emerald-500/30",
+
+        "bg-emerald-500/10",
+
+        "text-emerald-400",
+
+        "border-red-500/30",
+
+        "bg-red-500/10",
+
+        "text-red-400"
+
+      );
+
+
+      if (success) {
+
+        box.classList.add(
+
+          "border-emerald-500/30",
+
+          "bg-emerald-500/10",
+
+          "text-emerald-400"
+
+        );
+
+      } else {
+
+        box.classList.add(
+
+          "border-red-500/30",
+
+          "bg-red-500/10",
+
+          "text-red-400"
+
+        );
+
+      }
+
+    }
+
+
+    // ==========================================================
+    // ESC KEY
+    // ==========================================================
+
+    document.addEventListener(
+      "keydown",
+      function (event) {
+
+        if (
+          event.key ===
+          "Escape"
+        ) {
+
+          closeVerificationModal();
+
+        }
+
+      }
+    );
+
+
+    // ==========================================================
+    // ENTER KEY
+    // ==========================================================
+
+    document
+      .getElementById("walletInput")
+      .addEventListener(
+        "keydown",
+        function (event) {
+
+          if (
+            event.key ===
+            "Enter"
+          ) {
+
+            event.preventDefault();
+
+            fetchBalance();
+
+          }
+
+        }
+      );
+
+  </script>
+
+</body>
+  </html>
