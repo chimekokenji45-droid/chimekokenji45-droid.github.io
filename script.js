@@ -477,3 +477,570 @@ async function registerUser() {
   }
 
   }
+/* =========================================================
+   NEXUS FAUCET — FRONTEND JAVASCRIPT
+   PART 2 OF 4
+========================================================= */
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+async function loginUser() {
+
+  const email =
+    loginEmail
+      ? loginEmail.value.trim()
+      : "";
+
+  const password =
+    loginPassword
+      ? loginPassword.value
+      : "";
+
+
+  if (!validEmail(email)) {
+
+    showMessage(
+      "Please enter a valid email address."
+    );
+
+    return;
+
+  }
+
+
+  if (!password) {
+
+    showMessage(
+      "Please enter your password."
+    );
+
+    return;
+
+  }
+
+
+  if (loginButton) {
+
+    loginButton.disabled =
+      true;
+
+    loginButton.textContent =
+      "LOGGING IN...";
+
+  }
+
+
+  try {
+
+    const response =
+      await apiPost({
+
+        action: "login",
+
+        email: email,
+
+        password: password
+
+      });
+
+
+    console.log(
+      "LOGIN RESPONSE:",
+      response
+    );
+
+
+    if (
+      !response ||
+      response.success !== true
+    ) {
+
+      throw new Error(
+        response &&
+        response.message
+          ? response.message
+          : "Login failed."
+      );
+
+    }
+
+
+    if (!response.token) {
+
+      throw new Error(
+        "No session token was returned."
+      );
+
+    }
+
+
+    saveSessionToken(
+      response.token
+    );
+
+
+    currentUser =
+      response.user || null;
+
+
+    showMessage(
+      response.message ||
+      "Login successful!"
+    );
+
+
+    if (loginPassword) {
+
+      loginPassword.value =
+        "";
+
+    }
+
+
+    updateAccountUI();
+
+
+    await loadAccount();
+
+
+  } catch (error) {
+
+    console.error(
+      "LOGIN ERROR:",
+      error
+    );
+
+
+    showMessage(
+      error.message ||
+      "Login failed. Please try again."
+    );
+
+  } finally {
+
+    if (loginButton) {
+
+      loginButton.disabled =
+        false;
+
+      loginButton.textContent =
+        "LOGIN";
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   LOAD ACCOUNT
+========================================================= */
+
+async function loadAccount() {
+
+  const token =
+    getSessionToken();
+
+
+  if (!token) {
+
+    resetDashboard();
+
+    return;
+
+  }
+
+
+  try {
+
+    const response =
+      await apiPost({
+
+        action: "status",
+
+        token: token
+
+      });
+
+
+    console.log(
+      "STATUS RESPONSE:",
+      response
+    );
+
+
+    if (
+      !response ||
+      response.success !== true
+    ) {
+
+      throw new Error(
+        response &&
+        response.message
+          ? response.message
+          : "Unable to load account."
+      );
+
+    }
+
+
+    currentUser =
+      response.user || null;
+
+
+    currentBalance =
+      Number(
+        response.balance || 0
+      );
+
+
+    displayUser(
+      currentUser
+    );
+
+
+    displayBalance(
+      currentBalance
+    );
+
+
+    updateAccountUI();
+
+
+    startClaimTimer(
+      Number(
+        response.secondsUntilClaim || 0
+      )
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "LOAD ACCOUNT ERROR:",
+      error
+    );
+
+
+    removeSessionToken();
+
+    currentUser = null;
+
+    currentBalance = 0;
+
+    resetDashboard();
+
+  }
+
+}
+
+
+/* =========================================================
+   DISPLAY USER
+========================================================= */
+
+function displayUser(user) {
+
+  if (!user) {
+    return;
+  }
+
+
+  const email =
+    user.email || "";
+
+
+  if (accountEmail) {
+
+    accountEmail.textContent =
+      email;
+
+  }
+
+
+  if (faucetEmail) {
+
+    faucetEmail.value =
+      email;
+
+  }
+
+
+  if (referralEarnings) {
+
+    referralEarnings.textContent =
+      formatAmount(
+        user.referralEarnings || 0
+      );
+
+  }
+
+
+  if (referralLink) {
+
+    referralLink.value =
+      user.referralLink || "";
+
+  }
+
+}
+
+
+/* =========================================================
+   DISPLAY BALANCE
+========================================================= */
+
+function displayBalance(amount) {
+
+  currentBalance =
+    Number(amount) || 0;
+
+
+  if (balanceElement) {
+
+    balanceElement.textContent =
+      formatAmount(
+        currentBalance
+      );
+
+  }
+
+
+  updateWithdrawButton();
+
+}
+
+
+/* =========================================================
+   ACCOUNT UI
+========================================================= */
+
+function updateAccountUI() {
+
+  const loggedIn =
+    !!getSessionToken();
+
+
+  if (registerSection) {
+
+    registerSection.style.display =
+      loggedIn
+        ? "none"
+        : "";
+
+  }
+
+
+  if (loginSection) {
+
+    loginSection.style.display =
+      loggedIn
+        ? "none"
+        : "";
+
+  }
+
+
+  if (accountSection) {
+
+    accountSection.style.display =
+      loggedIn
+        ? ""
+        : "none";
+
+  }
+
+
+  if (logoutButton) {
+
+    logoutButton.style.display =
+      loggedIn
+        ? ""
+        : "none";
+
+  }
+
+
+  if (claimButton) {
+
+    claimButton.disabled =
+      !loggedIn;
+
+
+    if (!loggedIn) {
+
+      claimButton.textContent =
+        "LOGIN TO CLAIM";
+
+    }
+
+  }
+
+
+  updateWithdrawButton();
+
+}
+
+
+/* =========================================================
+   RESET DASHBOARD
+========================================================= */
+
+function resetDashboard() {
+
+  currentUser = null;
+
+  currentBalance = 0;
+
+
+  if (balanceElement) {
+
+    balanceElement.textContent =
+      formatAmount(0);
+
+  }
+
+
+  if (accountEmail) {
+
+    accountEmail.textContent =
+      "Not logged in";
+
+  }
+
+
+  if (faucetEmail) {
+
+    faucetEmail.value =
+      "";
+
+  }
+
+
+  if (referralEarnings) {
+
+    referralEarnings.textContent =
+      formatAmount(0);
+
+  }
+
+
+  if (referralLink) {
+
+    referralLink.value =
+      "";
+
+  }
+
+
+  if (claimButton) {
+
+    claimButton.disabled =
+      true;
+
+    claimButton.textContent =
+      "LOGIN TO CLAIM";
+
+  }
+
+
+  if (countdownElement) {
+
+    countdownElement.textContent =
+      "Login to claim";
+
+  }
+
+
+  updateAccountUI();
+
+}
+
+
+/* =========================================================
+   SHOW LOGIN
+========================================================= */
+
+function showLogin() {
+
+  if (registerSection) {
+
+    registerSection.style.display =
+      "none";
+
+  }
+
+
+  if (loginSection) {
+
+    loginSection.style.display =
+      "";
+
+  }
+
+}
+
+
+/* =========================================================
+   SHOW REGISTER
+========================================================= */
+
+function showRegister() {
+
+  if (loginSection) {
+
+    loginSection.style.display =
+      "none";
+
+  }
+
+
+  if (registerSection) {
+
+    registerSection.style.display =
+      "";
+
+  }
+
+}
+
+
+/* =========================================================
+   SESSION STORAGE
+========================================================= */
+
+function saveSessionToken(token) {
+
+  if (!token) {
+    return;
+  }
+
+
+  sessionStorage.setItem(
+    SESSION_KEY,
+    token
+  );
+
+}
+
+
+function getSessionToken() {
+
+  return sessionStorage.getItem(
+    SESSION_KEY
+  );
+
+}
+
+
+function removeSessionToken() {
+
+  sessionStorage.removeItem(
+    SESSION_KEY
+  );
+
+       }
