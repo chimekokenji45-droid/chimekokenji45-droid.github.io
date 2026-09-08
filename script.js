@@ -260,82 +260,67 @@ function setupButtons() {
 
 async function registerUser() {
 
-  const email =
-    registerEmail
-      ? registerEmail.value.trim()
-      : "";
+  const email = registerEmail
+    ? registerEmail.value.trim()
+    : "";
 
-  const password =
-    registerPassword
-      ? registerPassword.value
-      : "";
+  const password = registerPassword
+    ? registerPassword.value
+    : "";
 
-  const referral =
-    registerReferral
-      ? registerReferral.value.trim()
-      : "";
+  const referral = registerReferral
+    ? registerReferral.value.trim()
+    : "";
 
 
   if (!validEmail(email)) {
-
-    showMessage(
-      "Please enter a valid email address."
-    );
-
+    showMessage("Please enter a valid email address.");
     return;
   }
 
 
   if (password.length < 8) {
-
-    showMessage(
-      "Password must be at least 8 characters."
-    );
-
+    showMessage("Password must be at least 8 characters.");
     return;
   }
 
 
-  setButtonLoading(
-    registerButton,
-    true,
-    "Creating..."
-  );
+  if (registerButton) {
+    registerButton.disabled = true;
+    registerButton.textContent = "CREATING...";
+  }
 
 
   try {
 
     const response = await apiPost({
-
       action: "register",
-
       email: email,
-
       password: password,
-
       referral: referral
-
     });
 
 
-    if (!response.success) {
+    console.log("REGISTER RESPONSE:", response);
 
+
+    if (!response) {
+      throw new Error("No response received from the server.");
+    }
+
+
+    if (response.success !== true) {
       throw new Error(
         response.message ||
         "Registration failed."
       );
-
     }
 
 
     showMessage(
-      "Account created successfully. You can now log in."
+      response.message ||
+      "Account created successfully!"
     );
-
-
-    if (registerEmail) {
-      registerEmail.value = email;
-    }
 
 
     if (loginEmail) {
@@ -359,22 +344,22 @@ async function registerUser() {
   } catch (error) {
 
     console.error(
-      "Registration error:",
+      "REGISTER ERROR:",
       error
     );
 
+
     showMessage(
       error.message ||
-      "An error occurred. Please try again later."
+      "Registration failed. Please try again."
     );
 
   } finally {
 
-    setButtonLoading(
-      registerButton,
-      false,
-      "CREATE ACCOUNT"
-    );
+    if (registerButton) {
+      registerButton.disabled = false;
+      registerButton.textContent = "CREATE ACCOUNT";
+    }
 
   }
 
