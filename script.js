@@ -1117,10 +1117,18 @@ async function claimReward() {
       );
     }
 
+    /* ==========================================
+       UPDATE BALANCE
+    ========================================== */
+
     currentBalance =
       Number(response.balance || 0);
 
     displayBalance(currentBalance);
+
+    /* ==========================================
+       UPDATE REFERRAL EARNINGS
+    ========================================== */
 
     if (currentUser) {
       currentUser.referralEarnings =
@@ -1131,39 +1139,53 @@ async function claimReward() {
       displayUser(currentUser);
     }
 
+    /* ==========================================
+       SHOW SUCCESS MESSAGE
+    ========================================== */
+
     showMessage(
       response.message ||
       "Reward claimed successfully!"
     );
 
-    startClaimTimer(
-      Number(
-        response.secondsUntilClaim ||
-        CLAIM_INTERVAL
-      )
-    );
+    /* ==========================================
+       START 30-MINUTE COUNTDOWN
+       
+       The backend remains the final authority
+       on whether another claim is allowed.
+    ========================================== */
+
+    let seconds =
+      Number(response.secondsUntilClaim);
+
+    if (
+      !Number.isFinite(seconds) ||
+      seconds <= 0
+    ) {
+      seconds = CLAIM_INTERVAL;
+    }
+
+    startClaimTimer(seconds);
 
   } catch (error) {
-    console.error("CLAIM ERROR:", error);
+
+    console.error(
+      "CLAIM ERROR:",
+      error
+    );
 
     showMessage(
       error.message ||
       "Claim failed. Please try again."
     );
 
-    try {
-      await loadAccount();
-    } catch (reloadError) {
-      console.error(
-        "ACCOUNT RELOAD ERROR:",
-        reloadError
-      );
-    }
+    /*
+      Reload the account so the displayed
+      balance/timer comes from the server.
+    */
 
-  } finally {
-    if (claimButton) {
-      claimButton.disabled = true;
-    }
+    await loadAccount();
+
   }
 }
 
