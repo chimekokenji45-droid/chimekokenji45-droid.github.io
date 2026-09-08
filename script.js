@@ -1,345 +1,1188 @@
+/* =========================================================
+   NEXUS FAUCET
+   FRONTEND JAVASCRIPT
+   PART 1 OF 2
+========================================================= */
+
 "use strict";
 
-/*
 
-NEXUS FAUCET
+/* =========================================================
+   CONFIGURATION
+========================================================= */
 
-AD-BLOCK DETECTION ADDED
+const REWARD = 0.00002500;
+const MIN_WITHDRAWAL = 0.00050000;
+const CLAIM_INTERVAL = 30 * 60;
+const DECIMALS = 8;
 
-IMPORTANT:
-Ad-block detection cannot force a browser to disable
-its ad blocker. It can only detect likely blocking and
-ask the user to disable it.
+const SESSION_KEY = "nexus_session_token";
 
-*/
 
-/* =====================================================
-SETTINGS
-===================================================== */
+/* =========================================================
+   GOOGLE APPS SCRIPT BACKEND
+========================================================= */
 
-const CLAIM_REWARD = 0.000025;
+const NEXUS_API_URL =
+  "https://script.google.com/macros/s/AKfycbzwwwX_JW1YjccTPtc2xEQu2Lehu-IXzalvCQSoMrL6rCEmWeAcp-sx3HKSms-G6SyP/exec";
 
-const MIN_WITHDRAWAL = 0.0005;
 
-const CLAIM_INTERVAL = 1800;
+/* =========================================================
+   GLOBAL STATE
+========================================================= */
 
-const REFERRAL_COMMISSION = 0.20;
+let currentUser = null;
+let currentBalance = 0;
+let claimTimer = null;
 
-/* =====================================================
-ELEMENTS
-===================================================== */
 
-const emailInput =
-document.getElementById("faucetEmail");
+/* =========================================================
+   DOM ELEMENTS
+========================================================= */
 
-const balanceElement =
-document.getElementById("balance");
+let registerEmail;
+let registerPassword;
+let registerReferral;
+let registerButton;
 
-const timerElement =
-document.getElementById("timer");
+let loginEmail;
+let loginPassword;
+let loginButton;
 
-const claimButton =
-document.getElementById("claimButton");
+let logoutButton;
+let showLoginButton;
+let showRegisterButton;
 
-const withdrawAmount =
-document.getElementById("withdrawAmount");
+let registerSection;
+let loginSection;
+let accountSection;
 
-const withdrawButton =
-document.getElementById("withdrawButton");
+let accountEmail;
+let faucetEmail;
 
-const messageElement =
-document.getElementById("message");
+let balanceElement;
+let claimButton;
+let countdownElement;
 
-const referralLink =
-document.getElementById("referralLink");
+let withdrawAmount;
+let withdrawButton;
 
-const copyReferralButton =
-document.getElementById("copyReferralButton");
+let referralLink;
+let referralCopyButton;
+let referralEarnings;
 
-const referralCountElement =
-document.getElementById("referralCount");
 
-const referralEarningsElement =
-document.getElementById("referralEarnings");
+/* =========================================================
+   PAGE START
+========================================================= */
 
-/* =====================================================
-AD-BLOCK ELEMENT
-===================================================== */
+document.addEventListener("DOMContentLoaded", function () {
 
-let adBlockWarning =
-document.getElementById("adBlockWarning");
+  getElements();
 
-/*
-If the warning element doesn't already exist in
-index.html, create it automatically.
-*/
+  setupReferralFromUrl();
 
-if (!adBlockWarning) {
+  setupButtons();
 
-adBlockWarning =
-document.createElement("div");
+  updateAccountUI();
 
-adBlockWarning.id =
-"adBlockWarning";
+  const token = getSessionToken();
 
-adBlockWarning.innerHTML = `
-<div class="adblock-box">
-<strong>⚠️ Ad Blocker Detected</strong>
+  if (token) {
+    loadAccount();
+  } else {
+    resetDashboard();
+  }
 
-  <p>
-    Please disable your ad blocker for
-    Nexus Faucet before claiming.
-  </p>
+});
 
-  <button id="adBlockRetry">
-    I Disabled My Ad Blocker
-  </button>
-</div>
 
-`;
+/* =========================================================
+   GET HTML ELEMENTS
+========================================================= */
 
-document.body.prepend(
-adBlockWarning
-);
-}
+function getElements() {
 
-/* =====================================================
-AD-BLOCK STYLING
-===================================================== */
+  registerEmail =
+    document.getElementById("registerEmail");
 
-const adBlockStyle =
-document.createElement("style");
+  registerPassword =
+    document.getElementById("registerPassword");
 
-adBlockStyle.textContent = `
+  registerReferral =
+    document.getElementById("registerReferral");
 
-#adBlockWarning {
-display: none;
-width: 100%;
-box-sizing: border-box;
-padding: 15px;
-text-align: center;
-}
+  registerButton =
+    document.getElementById("registerButton");
 
-#adBlockWarning .adblock-box {
-max-width: 500px;
-margin: 10px auto;
-padding: 20px;
-border-radius: 12px;
-border: 1px solid #ff4444;
-background: #241010;
-color: white;
-box-sizing: border-box;
-}
 
-#adBlockWarning strong {
-display: block;
-font-size: 18px;
-margin-bottom: 8px;
-}
+  loginEmail =
+    document.getElementById("loginEmail");
 
-#adBlockWarning p {
-margin: 10px 0 15px;
-line-height: 1.5;
-}
+  loginPassword =
+    document.getElementById("loginPassword");
 
-#adBlockRetry {
-border: none;
-border-radius: 8px;
-padding: 10px 18px;
-cursor: pointer;
-font-weight: bold;
-}
+  loginButton =
+    document.getElementById("loginButton");
 
-#adBlockRetry:hover {
-opacity: 0.9;
-}
 
-`;
+  logoutButton =
+    document.getElementById("logoutButton");
 
-document.head.appendChild(
-adBlockStyle
-);
+  showLoginButton =
+    document.getElementById("showLoginButton");
 
-/* =====================================================
-AD-BLOCK STATE
-===================================================== */
+  showRegisterButton =
+    document.getElementById("showRegisterButton");
 
-let adBlockDetected = false;
 
-/* =====================================================
-LOCAL DATA
+  registerSection =
+    document.getElementById("registerSection");
 
-PROTOTYPE ONLY
-===================================================== */
+  loginSection =
+    document.getElementById("loginSection");
 
-let balance =
-Number(
-localStorage.getItem(
-"nexusBalance"
-) || "0"
-);
+  accountSection =
+    document.getElementById("accountSection");
 
-let claimTimer =
-Number(
-localStorage.getItem(
-"nexusClaimTimer"
-) || "0"
-);
 
-let referralCount =
-Number(
-localStorage.getItem(
-"nexusReferralCount"
-) || "0"
-);
+  accountEmail =
+    document.getElementById("accountEmail");
 
-let referralEarnings =
-Number(
-localStorage.getItem(
-"nexusReferralEarnings"
-) || "0"
-);
+  faucetEmail =
+    document.getElementById("faucetEmail");
 
-/* =====================================================
-SAVE DATA
-===================================================== */
 
-function saveData() {
+  balanceElement =
+    document.getElementById("balance");
 
-localStorage.setItem(
-"nexusBalance",
-balance.toFixed(8)
-);
+  claimButton =
+    document.getElementById("claimButton");
 
-localStorage.setItem(
-"nexusClaimTimer",
-String(claimTimer)
-);
+  countdownElement =
+    document.getElementById("countdown");
 
-localStorage.setItem(
-"nexusReferralCount",
-String(referralCount)
-);
 
-localStorage.setItem(
-"nexusReferralEarnings",
-referralEarnings.toFixed(8)
-);
+  withdrawAmount =
+    document.getElementById("withdrawAmount");
+
+  withdrawButton =
+    document.getElementById("withdrawButton");
+
+
+  referralLink =
+    document.getElementById("referralLink");
+
+  referralCopyButton =
+    document.getElementById("referralCopyButton");
+
+  referralEarnings =
+    document.getElementById("referralEarnings");
 
 }
 
-/* =====================================================
-UPDATE BALANCE
-===================================================== */
 
-function updateBalance() {
+/* =========================================================
+   BUTTON EVENTS
+========================================================= */
 
-if (balanceElement) {
+function setupButtons() {
 
-balanceElement.textContent =
-  balance.toFixed(8);
+  if (registerButton) {
+    registerButton.addEventListener(
+      "click",
+      registerUser
+    );
+  }
 
-}
 
-}
+  if (loginButton) {
+    loginButton.addEventListener(
+      "click",
+      loginUser
+    );
+  }
 
-/* =====================================================
-UPDATE REFERRALS
-===================================================== */
 
-function updateReferralStats() {
+  if (logoutButton) {
+    logoutButton.addEventListener(
+      "click",
+      logoutUser
+    );
+  }
 
-if (referralCountElement) {
 
-referralCountElement.textContent =
-  referralCount;
+  if (claimButton) {
+    claimButton.addEventListener(
+      "click",
+      claimReward
+    );
+  }
 
-}
 
-if (referralEarningsElement) {
+  if (withdrawButton) {
+    withdrawButton.addEventListener(
+      "click",
+      requestWithdrawal
+    );
+  }
 
-referralEarningsElement.textContent =
-  referralEarnings.toFixed(8);
 
-}
+  if (showLoginButton) {
+    showLoginButton.addEventListener(
+      "click",
+      showLogin
+    );
+  }
 
-}
 
-/* =====================================================
-MESSAGE
-===================================================== */
+  if (showRegisterButton) {
+    showRegisterButton.addEventListener(
+      "click",
+      showRegister
+    );
+  }
 
-function showMessage(
-text,
-type = "success"
-) {
 
-if (!messageElement) return;
-
-messageElement.textContent =
-text;
-
-messageElement.className =
-"message " + type;
-
-}
-
-/* =====================================================
-FORMAT TIME
-===================================================== */
-
-function formatTime(
-seconds
-) {
-
-const minutes =
-Math.floor(seconds / 60);
-
-const remainingSeconds =
-seconds % 60;
-
-return (
-String(minutes).padStart(2, "0") +
-":" +
-String(remainingSeconds).padStart(2, "0")
-);
+  if (referralCopyButton) {
+    referralCopyButton.addEventListener(
+      "click",
+      copyReferralLink
+    );
+  }
 
 }
 
-/* =====================================================
-UPDATE CLAIM BUTTON
-===================================================== */
 
-function updateClaimButton() {
+/* =========================================================
+   REGISTER
+========================================================= */
 
-if (!claimButton) return;
+async function registerUser() {
 
-if (claimTimer <= 0) {
+  const email =
+    registerEmail
+      ? registerEmail.value.trim()
+      : "";
 
-if (timerElement) {
+  const password =
+    registerPassword
+      ? registerPassword.value
+      : "";
 
-  timerElement.textContent =
-    "00:00";
+  const referral =
+    registerReferral
+      ? registerReferral.value.trim()
+      : "";
+
+
+  if (!validEmail(email)) {
+
+    showMessage(
+      "Please enter a valid email address."
+    );
+
+    return;
+  }
+
+
+  if (password.length < 8) {
+
+    showMessage(
+      "Password must be at least 8 characters."
+    );
+
+    return;
+  }
+
+
+  setButtonLoading(
+    registerButton,
+    true,
+    "Creating..."
+  );
+
+
+  try {
+
+    const response = await apiPost({
+
+      action: "register",
+
+      email: email,
+
+      password: password,
+
+      referral: referral
+
+    });
+
+
+    if (!response.success) {
+
+      throw new Error(
+        response.message ||
+        "Registration failed."
+      );
+
+    }
+
+
+    showMessage(
+      "Account created successfully. You can now log in."
+    );
+
+
+    if (registerEmail) {
+      registerEmail.value = email;
+    }
+
+
+    if (loginEmail) {
+      loginEmail.value = email;
+    }
+
+
+    if (registerPassword) {
+      registerPassword.value = "";
+    }
+
+
+    if (registerReferral) {
+      registerReferral.value = "";
+    }
+
+
+    showLogin();
+
+
+  } catch (error) {
+
+    console.error(
+      "Registration error:",
+      error
+    );
+
+    showMessage(
+      error.message ||
+      "An error occurred. Please try again later."
+    );
+
+  } finally {
+
+    setButtonLoading(
+      registerButton,
+      false,
+      "CREATE ACCOUNT"
+    );
+
+  }
 
 }
 
-/*
-IMPORTANT:
-Don't enable claim if ad blocker
-is detected.
-*/
 
-if (adBlockDetected) {
+/* =========================================================
+   LOGIN
+========================================================= */
 
-  claimButton.disabled =
-    true;
+async function loginUser() {
 
-  claimButton.textContent =
-    "DISABLE AD BLOCKER";
+  const email =
+    loginEmail
+      ? loginEmail.value.trim()
+      : "";
+
+  const password =
+    loginPassword
+      ? loginPassword.value
+      : "";
+
+
+  if (!validEmail(email)) {
+
+    showMessage(
+      "Please enter a valid email address."
+    );
+
+    return;
+  }
+
+
+  if (!password) {
+
+    showMessage(
+      "Please enter your password."
+    );
+
+    return;
+  }
+
+
+  setButtonLoading(
+    loginButton,
+    true,
+    "Logging in..."
+  );
+
+
+  try {
+
+    const response = await apiPost({
+
+      action: "login",
+
+      email: email,
+
+      password: password
+
+    });
+
+
+    if (!response.success) {
+
+      throw new Error(
+        response.message ||
+        "Login failed."
+      );
+
+    }
+
+
+    if (!response.token) {
+
+      throw new Error(
+        "Login succeeded but no session was returned."
+      );
+
+    }
+
+
+    saveSessionToken(
+      response.token
+    );
+
+
+    currentUser =
+      response.user || null;
+
+
+    showMessage(
+      "Login successful."
+    );
+
+
+    if (loginPassword) {
+      loginPassword.value = "";
+    }
+
+
+    updateAccountUI();
+
+
+    await loadAccount();
+
+
+  } catch (error) {
+
+    console.error(
+      "Login error:",
+      error
+    );
+
+    showMessage(
+      error.message ||
+      "An error occurred. Please try again later."
+    );
+
+  } finally {
+
+    setButtonLoading(
+      loginButton,
+      false,
+      "LOGIN"
+    );
+
+  }
 
 }
 
-else {
+
+/* =========================================================
+   LOAD ACCOUNT
+========================================================= */
+
+async function loadAccount() {
+
+  const token =
+    getSessionToken();
+
+
+  if (!token) {
+
+    resetDashboard();
+
+    return;
+
+  }
+
+
+  try {
+
+    const response = await apiPost({
+
+      action: "status",
+
+      token: token
+
+    });
+
+
+    if (!response.success) {
+
+      throw new Error(
+        response.message ||
+        "Unable to load account."
+      );
+
+    }
+
+
+    currentUser =
+      response.user || null;
+
+
+    currentBalance =
+      Number(
+        response.balance ||
+        0
+      );
+
+
+    displayUser(
+      currentUser
+    );
+
+
+    displayBalance(
+      currentBalance
+    );
+
+
+    updateAccountUI();
+
+
+    startClaimTimer(
+      response.secondsUntilClaim ||
+      0
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Account loading error:",
+      error
+    );
+
+
+    removeSessionToken();
+
+    currentUser = null;
+
+    currentBalance = 0;
+
+    resetDashboard();
+
+  }
+
+}
+
+
+/* =========================================================
+   DISPLAY USER
+========================================================= */
+
+function displayUser(user) {
+
+  if (!user) {
+    return;
+  }
+
+
+  const email =
+    user.email || "";
+
+
+  if (accountEmail) {
+    accountEmail.textContent = email;
+  }
+
+
+  if (faucetEmail) {
+    faucetEmail.value = email;
+  }
+
+
+  if (referralEarnings) {
+
+    referralEarnings.textContent =
+      formatAmount(
+        user.referralEarnings || 0
+      );
+
+  }
+
+
+  if (referralLink) {
+
+    referralLink.value =
+      user.referralLink || "";
+
+  }
+
+}
+
+
+/* =========================================================
+   DISPLAY BALANCE
+========================================================= */
+
+function displayBalance(amount) {
+
+  currentBalance =
+    Number(amount) || 0;
+
+
+  if (balanceElement) {
+
+    balanceElement.textContent =
+      formatAmount(
+        currentBalance
+      );
+
+  }
+
+
+  updateWithdrawButton();
+
+}
+
+
+/* =========================================================
+   ACCOUNT UI
+========================================================= */
+
+function updateAccountUI() {
+
+  const loggedIn =
+    !!getSessionToken();
+
+
+  if (registerSection) {
+
+    registerSection.style.display =
+      loggedIn ? "none" : "";
+
+  }
+
+
+  if (loginSection) {
+
+    loginSection.style.display =
+      loggedIn ? "none" : "";
+
+  }
+
+
+  if (accountSection) {
+
+    accountSection.style.display =
+      loggedIn ? "" : "none";
+
+  }
+
+
+  if (logoutButton) {
+
+    logoutButton.style.display =
+      loggedIn ? "" : "none";
+
+  }
+
+
+  if (claimButton) {
+
+    claimButton.disabled =
+      !loggedIn;
+
+  }
+
+
+  updateWithdrawButton();
+
+}
+
+
+/* =========================================================
+   RESET DASHBOARD
+========================================================= */
+
+function resetDashboard() {
+
+  currentUser = null;
+
+  currentBalance = 0;
+
+
+  displayBalance(0);
+
+
+  if (accountEmail) {
+    accountEmail.textContent =
+      "Not logged in";
+  }
+
+
+  if (faucetEmail) {
+    faucetEmail.value = "";
+  }
+
+
+  if (referralEarnings) {
+    referralEarnings.textContent =
+      "0.00000000";
+  }
+
+
+  if (referralLink) {
+    referralLink.value = "";
+  }
+
+
+  if (claimButton) {
+
+    claimButton.disabled =
+      true;
+
+    claimButton.textContent =
+      "LOGIN TO CLAIM";
+
+  }
+
+
+  if (countdownElement) {
+
+    countdownElement.textContent =
+      "Login to claim";
+
+  }
+
+
+  updateAccountUI();
+
+}
+
+
+/* =========================================================
+   SHOW LOGIN
+========================================================= */
+
+function showLogin() {
+
+  if (registerSection) {
+
+    registerSection.style.display =
+      "none";
+
+  }
+
+
+  if (loginSection) {
+
+    loginSection.style.display =
+      "";
+
+  }
+
+}
+
+
+/* =========================================================
+   SHOW REGISTER
+========================================================= */
+
+function showRegister() {
+
+  if (loginSection) {
+
+    loginSection.style.display =
+      "none";
+
+  }
+
+
+  if (registerSection) {
+
+    registerSection.style.display =
+      "";
+
+  }
+
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+async function logoutUser() {
+
+  const token =
+    getSessionToken();
+
+
+  if (token) {
+
+    try {
+
+      await apiPost({
+
+        action: "logout",
+
+        token: token
+
+      });
+
+    } catch (error) {
+
+      console.warn(
+        "Logout request failed:",
+        error
+      );
+
+    }
+
+  }
+
+
+  removeSessionToken();
+
+  currentUser = null;
+
+  currentBalance = 0;
+
+
+  if (claimTimer) {
+
+    clearInterval(
+      claimTimer
+    );
+
+    claimTimer = null;
+
+  }
+
+
+  resetDashboard();
+
+
+  showLogin();
+
+
+  showMessage(
+    "You have been logged out."
+  );
+
+}
+
+
+/* =========================================================
+   SESSION STORAGE
+========================================================= */
+
+function saveSessionToken(token) {
+
+  if (!token) {
+    return;
+  }
+
+
+  sessionStorage.setItem(
+    SESSION_KEY,
+    token
+  );
+
+}
+
+
+function getSessionToken() {
+
+  return sessionStorage.getItem(
+    SESSION_KEY
+  );
+
+}
+
+
+function removeSessionToken() {
+
+  sessionStorage.removeItem(
+    SESSION_KEY
+  );
+
+}
+
+
+/* =========================================================
+   CLAIM REWARD
+========================================================= */
+
+async function claimReward() {
+
+  const token =
+    getSessionToken();
+
+
+  if (!token) {
+
+    showMessage(
+      "Please log in before claiming."
+    );
+
+    return;
+
+  }
+
+
+  if (claimButton) {
+
+    claimButton.disabled =
+      true;
+
+    claimButton.textContent =
+      "CLAIMING...";
+
+  }
+
+
+  try {
+
+    const response = await apiPost({
+
+      action: "claim",
+
+      token: token
+
+    });
+
+
+    if (!response.success) {
+
+      throw new Error(
+        response.message ||
+        "Claim failed."
+      );
+
+    }
+
+
+    currentBalance =
+      Number(
+        response.balance ||
+        0
+      );
+
+
+    displayBalance(
+      currentBalance
+    );
+
+
+    startClaimTimer(
+      response.secondsUntilClaim ||
+      CLAIM_INTERVAL
+    );
+
+
+    showMessage(
+      "Claim successful! +" +
+      formatAmount(REWARD) +
+      " USDT"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Claim error:",
+      error
+    );
+
+
+    showMessage(
+      error.message ||
+      "Unable to claim right now."
+    );
+
+
+    await loadAccount();
+
+  }
+
+}
+
+
+/* =========================================================
+   CLAIM TIMER
+========================================================= */
+
+function startClaimTimer(seconds) {
+
+  if (claimTimer) {
+
+    clearInterval(
+      claimTimer
+    );
+
+    claimTimer = null;
+
+  }
+
+
+  let remaining =
+    Math.max(
+      0,
+      Math.floor(
+        Number(seconds) || 0
+      )
+    );
+
+
+  updateClaimTimer(
+    remaining
+  );
+
+
+  if (remaining <= 0) {
+
+    enableClaimButton();
+
+    return;
+
+  }
+
+
+  if (claimButton) {
+
+    claimButton.disabled =
+      true;
+
+    claimButton.textContent =
+      "PLEASE WAIT";
+
+  }
+
+
+  claimTimer =
+    setInterval(
+      function () {
+
+        remaining--;
+
+        updateClaimTimer(
+          remaining
+        );
+
+
+        if (remaining <= 0) {
+
+          clearInterval(
+            claimTimer
+          );
+
+          claimTimer = null;
+
+          enableClaimButton();
+
+        }
+
+      },
+      1000
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE CLAIM TIMER
+========================================================= */
+
+function updateClaimTimer(seconds) {
+
+  if (!countdownElement) {
+    return;
+  }
+
+
+  if (seconds <= 0) {
+
+    countdownElement.textContent =
+      "Ready to claim!";
+
+    return;
+
+  }
+
+
+  const hours =
+    Math.floor(
+      seconds / 3600
+    );
+
+
+  const minutes =
+    Math.floor(
+      (seconds % 3600) / 60
+    );
+
+
+  const secs =
+    seconds % 60;
+
+
+  countdownElement.textContent =
+    pad(hours) +
+    ":" +
+    pad(minutes) +
+    ":" +
+    pad(secs);
+
+}
+
+
+/* =========================================================
+   ENABLE CLAIM BUTTON
+========================================================= */
+
+function enableClaimButton() {
+
+  if (!claimButton) {
+    return;
+  }
+
+
+  if (!getSessionToken()) {
+
+    claimButton.disabled =
+      true;
+
+    claimButton.textContent =
+      "LOGIN TO CLAIM";
+
+    return;
+
+  }
+
 
   claimButton.disabled =
     false;
@@ -349,622 +1192,619 @@ else {
 
 }
 
-}
 
-else {
+/* =========================================================
+   PAD NUMBER
+========================================================= */
 
-if (timerElement) {
+function pad(number) {
 
-  timerElement.textContent =
-    formatTime(claimTimer);
-
-}
-
-claimButton.disabled =
-  true;
-
-claimButton.textContent =
-  "PLEASE WAIT";
-
-}
-
-}
-
-/* =====================================================
-TIMER
-===================================================== */
-
-function runTimer() {
-
-updateClaimButton();
-
-setInterval(
-function () {
-
-  if (claimTimer > 0) {
-
-    claimTimer--;
-
-    saveData();
-
-    updateClaimButton();
-
-  }
-
-},
-1000
-
-);
-
-}
-
-/* =====================================================
-EMAIL VALIDATION
-===================================================== */
-
-function validEmail(
-email
-) {
-
-return /^[^\s@]+@[^\s@]+.[^\s@]+$/.test(
-email
-);
-
-}
-
-/* =====================================================
-AD-BLOCK DETECTION
-===================================================== */
-
-function checkAdBlock() {
-
-/*
-Create an element using common ad-related
-class/id names.
-
-Many ad blockers hide elements containing
-these names.
-*/
-
-const bait =
-document.createElement("div");
-
-bait.className =
-"adsbox ad-banner ad-unit adsbygoogle";
-
-bait.id =
-"ad-banner";
-
-bait.style.position =
-"absolute";
-
-bait.style.left =
-"-9999px";
-
-bait.style.width =
-"1px";
-
-bait.style.height =
-"1px";
-
-bait.style.display =
-"block";
-
-document.body.appendChild(
-bait
-);
-
-/*
-Give the browser a moment to let
-content blockers act.
-*/
-
-setTimeout(
-function () {
-
-  const blocked =
-    bait.offsetHeight === 0 ||
-    bait.offsetWidth === 0 ||
-    getComputedStyle(bait).display === "none" ||
-    getComputedStyle(bait).visibility === "hidden";
-
-
-  adBlockDetected =
-    blocked;
-
-
-  bait.remove();
-
-
-  updateAdBlockUI();
-
-  updateClaimButton();
-
-},
-500
-
-);
-
-}
-
-/* =====================================================
-UPDATE AD-BLOCK UI
-===================================================== */
-
-function updateAdBlockUI() {
-
-if (!adBlockWarning) return;
-
-if (adBlockDetected) {
-
-adBlockWarning.style.display =
-  "block";
-
-showMessage(
-  "Please disable your ad blocker before claiming.",
-  "error"
-);
-
-}
-
-else {
-
-adBlockWarning.style.display =
-  "none";
-
-}
-
-}
-
-/* =====================================================
-RETRY AD DETECTION
-===================================================== */
-
-const adBlockRetry =
-document.getElementById(
-"adBlockRetry"
-);
-
-if (adBlockRetry) {
-
-adBlockRetry.addEventListener(
-"click",
-function () {
-
-  showMessage(
-    "Checking your browser...",
-    "success"
-  );
-
-
-  adBlockDetected =
-    false;
-
-
-  updateClaimButton();
-
-
-  checkAdBlock();
-
-}
-
-);
-
-}
-
-/* =====================================================
-PERIODIC AD-BLOCK CHECK
-===================================================== */
-
-setInterval(
-function () {
-
-checkAdBlock();
-
-},
-10000
-);
-
-/* =====================================================
-CLAIM
-===================================================== */
-
-if (claimButton) {
-
-claimButton.addEventListener(
-"click",
-function () {
-
-  /*
-  CHECK AD BLOCKER
-  */
-
-  if (adBlockDetected) {
-
-    showMessage(
-      "Please disable your ad blocker before claiming.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  const email =
-    emailInput.value.trim();
-
-
-  /* -----------------------------------------------
-     CHECK EMAIL
-  ------------------------------------------------ */
-
-  if (!validEmail(email)) {
-
-    showMessage(
-      "Enter your valid FaucetPay email first.",
-      "error"
-    );
-
-    emailInput.focus();
-
-    return;
-
-  }
-
-
-  /* -----------------------------------------------
-     CHECK TIMER
-  ------------------------------------------------ */
-
-  if (claimTimer > 0) {
-
-    showMessage(
-      "Your next claim is not ready yet.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  /* -----------------------------------------------
-     ADD REWARD
-  ------------------------------------------------ */
-
-  balance =
-    Number(
-      (
-        balance +
-        CLAIM_REWARD
-      ).toFixed(8)
-    );
-
-
-  /* -----------------------------------------------
-     START TIMER
-  ------------------------------------------------ */
-
-  claimTimer =
-    CLAIM_INTERVAL;
-
-
-  /* -----------------------------------------------
-     SAVE
-  ------------------------------------------------ */
-
-  saveData();
-
-
-  /* -----------------------------------------------
-     UPDATE DISPLAY
-  ------------------------------------------------ */
-
-  updateBalance();
-
-  updateClaimButton();
-
-
-  /* -----------------------------------------------
-     SUCCESS MESSAGE
-  ------------------------------------------------ */
-
-  showMessage(
-    "Claim successful! +" +
-    CLAIM_REWARD.toFixed(8) +
-    " USDT",
-    "success"
+  return String(
+    number
+  ).padStart(
+    2,
+    "0"
   );
 
 }
 
-);
 
-}
+/* =========================================================
+   WITHDRAW BUTTON STATE
+========================================================= */
 
-/* =====================================================
-WITHDRAW
-===================================================== */
+function updateWithdrawButton() {
 
-if (withdrawButton) {
-
-withdrawButton.addEventListener(
-"click",
-function () {
-
-  const email =
-    emailInput.value.trim();
+  if (!withdrawButton) {
+    return;
+  }
 
 
   const amount =
     Number(
-      withdrawAmount.value
-    );
+      withdrawAmount
+        ? withdrawAmount.value
+        : 0
+    ) || 0;
 
 
-  /* -----------------------------------------------
-     CHECK EMAIL
-  ------------------------------------------------ */
+  const loggedIn =
+    !!getSessionToken();
 
-  if (!validEmail(email)) {
+
+  withdrawButton.disabled =
+    !loggedIn ||
+    amount < MIN_WITHDRAWAL ||
+    amount > currentBalance;
+
+}
+/* =========================================================
+   NEXUS FAUCET
+   FRONTEND JAVASCRIPT
+   PART 2 OF 2
+========================================================= */
+
+
+/* =========================================================
+   WITHDRAWAL INPUT
+========================================================= */
+
+if (withdrawAmount) {
+
+  withdrawAmount.addEventListener(
+    "input",
+    updateWithdrawButton
+  );
+
+}
+
+
+/* =========================================================
+   REQUEST WITHDRAWAL
+========================================================= */
+
+async function requestWithdrawal() {
+
+  const token =
+    getSessionToken();
+
+  if (!token) {
 
     showMessage(
-      "Enter your valid FaucetPay email first.",
-      "error"
+      "Please log in before requesting a withdrawal."
     );
 
-    emailInput.focus();
-
     return;
-
   }
 
 
-  /* -----------------------------------------------
-     CHECK AMOUNT
-  ------------------------------------------------ */
+  const amount =
+    Number(
+      withdrawAmount
+        ? withdrawAmount.value
+        : 0
+    );
 
-  if (
-    !Number.isFinite(amount) ||
-    amount <= 0
-  ) {
+
+  if (!Number.isFinite(amount)) {
 
     showMessage(
-      "Enter a valid withdrawal amount.",
-      "error"
+      "Please enter a valid withdrawal amount."
     );
 
     return;
-
   }
 
-
-  /* -----------------------------------------------
-     CHECK MINIMUM
-  ------------------------------------------------ */
 
   if (amount < MIN_WITHDRAWAL) {
 
     showMessage(
       "Minimum withdrawal is " +
-      MIN_WITHDRAWAL.toFixed(8) +
-      " USDT.",
-      "error"
+      formatAmount(MIN_WITHDRAWAL) +
+      " USDT."
     );
 
     return;
-
   }
 
 
-  /* -----------------------------------------------
-     CHECK BALANCE
-  ------------------------------------------------ */
-
-  if (amount > balance) {
+  if (amount > currentBalance) {
 
     showMessage(
-      "Insufficient balance.",
-      "error"
+      "You do not have enough balance."
     );
 
     return;
-
   }
 
 
-  /* -----------------------------------------------
-     BACKEND NOT CONNECTED
-  ------------------------------------------------ */
+  if (!confirm(
+    "Withdraw " +
+    formatAmount(amount) +
+    " USDT to your registered FaucetPay email?"
+  )) {
 
-  showMessage(
-    "Withdrawal is not connected yet. " +
-    "The secure backend must be connected before real payouts.",
-    "error"
+    return;
+  }
+
+
+  setButtonLoading(
+    withdrawButton,
+    true,
+    "PROCESSING..."
   );
 
+
+  try {
+
+    const response =
+      await apiPost({
+
+        action: "withdraw",
+
+        token: token,
+
+        amount: amount
+
+      });
+
+
+    if (!response.success) {
+
+      throw new Error(
+        response.message ||
+        "Withdrawal failed."
+      );
+
+    }
+
+
+    currentBalance =
+      Number(
+        response.balance ||
+        0
+      );
+
+
+    displayBalance(
+      currentBalance
+    );
+
+
+    if (withdrawAmount) {
+      withdrawAmount.value = "";
+    }
+
+
+    showMessage(
+      response.message ||
+      "Withdrawal submitted successfully."
+    );
+
+
+    updateWithdrawButton();
+
+
+  } catch (error) {
+
+    console.error(
+      "Withdrawal error:",
+      error
+    );
+
+
+    showMessage(
+      error.message ||
+      "Withdrawal failed. Please try again later."
+    );
+
+
+    await loadAccount();
+
+  } finally {
+
+    setButtonLoading(
+      withdrawButton,
+      false,
+      "WITHDRAW"
+    );
+
+  }
+
 }
 
-);
+
+/* =========================================================
+   REFERRAL URL
+========================================================= */
+
+function setupReferralFromUrl() {
+
+  if (!registerReferral) {
+    return;
+  }
+
+
+  try {
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+
+    const referral =
+      params.get("ref");
+
+
+    if (
+      referral &&
+      referral.trim()
+    ) {
+
+      registerReferral.value =
+        referral.trim();
+
+    }
+
+  } catch (error) {
+
+    console.warn(
+      "Unable to read referral URL:",
+      error
+    );
+
+  }
 
 }
 
-/* =====================================================
-REFERRAL ID
-===================================================== */
 
-let referralId =
-localStorage.getItem(
-"nexusReferralId"
-);
+/* =========================================================
+   COPY REFERRAL LINK
+========================================================= */
 
-if (!referralId) {
+async function copyReferralLink() {
 
-referralId =
-"NEXUS-" +
-Math.random()
-.toString(36)
-.substring(
-2,
-10
-)
-.toUpperCase();
+  if (!referralLink) {
+    return;
+  }
 
-localStorage.setItem(
-"nexusReferralId",
-referralId
-);
 
-}
+  const text =
+    referralLink.value ||
+    referralLink.textContent ||
+    "";
 
-/* =====================================================
-REFERRAL LINK
-===================================================== */
 
-if (referralLink) {
+  if (!text) {
 
-const currentUrl =
-window.location.origin +
-window.location.pathname;
+    showMessage(
+      "Your referral link is not available yet."
+    );
 
-referralLink.value =
-currentUrl +
-"?ref=" +
-encodeURIComponent(
-referralId
-);
+    return;
+  }
 
-}
-
-/* =====================================================
-READ REFERRAL FROM URL
-===================================================== */
-
-const urlParams =
-new URLSearchParams(
-window.location.search
-);
-
-const incomingReferral =
-urlParams.get("ref");
-
-if (
-incomingReferral &&
-incomingReferral !== referralId
-) {
-
-localStorage.setItem(
-"nexusIncomingReferral",
-incomingReferral
-);
-
-}
-
-/* =====================================================
-COPY REFERRAL LINK
-===================================================== */
-
-if (copyReferralButton) {
-
-copyReferralButton.addEventListener(
-"click",
-async function () {
 
   try {
 
     await navigator.clipboard.writeText(
-      referralLink.value
+      text
     );
 
 
-    copyReferralButton.textContent =
-      "COPIED";
+    showMessage(
+      "Referral link copied!"
+    );
 
 
-    setTimeout(
-      function () {
+  } catch (error) {
 
-        copyReferralButton.textContent =
-          "COPY";
+    console.warn(
+      "Clipboard API failed:",
+      error
+    );
 
-      },
-      2000
+
+    try {
+
+      referralLink.select();
+
+      document.execCommand(
+        "copy"
+      );
+
+
+      showMessage(
+        "Referral link copied!"
+      );
+
+    } catch (copyError) {
+
+      showMessage(
+        "Unable to copy the referral link."
+      );
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   API REQUEST
+========================================================= */
+
+async function apiPost(data) {
+
+  if (!NEXUS_API_URL) {
+
+    throw new Error(
+      "Backend URL is not configured."
     );
 
   }
 
-  catch (error) {
 
-    referralLink.select();
+  const response =
+    await fetch(
+      NEXUS_API_URL,
+      {
 
-    document.execCommand(
-      "copy"
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "text/plain;charset=utf-8"
+        },
+
+        body:
+          JSON.stringify(data)
+
+      }
     );
 
-    copyReferralButton.textContent =
-      "COPIED";
+
+  if (!response.ok) {
+
+    throw new Error(
+      "Server error: " +
+      response.status
+    );
+
+  }
+
+
+  const text =
+    await response.text();
+
+
+  let result;
+
+
+  try {
+
+    result =
+      JSON.parse(text);
+
+  } catch (error) {
+
+    console.error(
+      "Invalid server response:",
+      text
+    );
+
+
+    throw new Error(
+      "The server returned an invalid response."
+    );
+
+  }
+
+
+  return result;
+
+}
+
+
+/* =========================================================
+   EMAIL VALIDATION
+========================================================= */
+
+function validEmail(email) {
+
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+    email
+  );
+
+}
+
+
+/* =========================================================
+   FORMAT AMOUNT
+========================================================= */
+
+function formatAmount(amount) {
+
+  const value =
+    Number(amount);
+
+
+  if (!Number.isFinite(value)) {
+    return "0.00000000";
+  }
+
+
+  return value.toFixed(
+    DECIMALS
+  );
+
+}
+
+
+/* =========================================================
+   BUTTON LOADING
+========================================================= */
+
+function setButtonLoading(
+  button,
+  loading,
+  text
+) {
+
+  if (!button) {
+    return;
+  }
+
+
+  if (loading) {
+
+    button.disabled =
+      true;
+
+    button.dataset.originalText =
+      button.textContent;
+
+
+    button.textContent =
+      text;
+
+  } else {
+
+    button.disabled =
+      false;
+
+
+    button.textContent =
+      button.dataset.originalText ||
+      text;
 
   }
 
 }
 
-);
+
+/* =========================================================
+   MESSAGE SYSTEM
+========================================================= */
+
+function showMessage(message) {
+
+  console.log(
+    "Nexus Faucet:",
+    message
+  );
+
+
+  /*
+   * If your HTML has an element with
+   * id="message", it will be used.
+   */
+
+  const messageElement =
+    document.getElementById(
+      "message"
+    );
+
+
+  if (messageElement) {
+
+    messageElement.textContent =
+      message;
+
+
+    messageElement.style.display =
+      "block";
+
+
+    clearTimeout(
+      messageElement._nexusTimeout
+    );
+
+
+    messageElement._nexusTimeout =
+      setTimeout(
+        function () {
+
+          messageElement.style.display =
+            "none";
+
+        },
+        5000
+      );
+
+
+    return;
+
+  }
+
+
+  /*
+   * Fallback if there is no message
+   * element in the HTML.
+   */
+
+  alert(message);
 
 }
 
-/* =====================================================
-REFERRAL COMMISSION
-===================================================== */
 
-function calculateReferralCommission(
-claimReward
-) {
+/* =========================================================
+   PREVENT NEGATIVE WITHDRAWAL VALUES
+========================================================= */
 
-return Number(
-(
-claimReward *
-REFERRAL_COMMISSION
-).toFixed(8)
-);
+if (withdrawAmount) {
+
+  withdrawAmount.addEventListener(
+    "input",
+    function () {
+
+      let value =
+        Number(
+          withdrawAmount.value
+        );
+
+
+      if (
+        !Number.isFinite(value) ||
+        value < 0
+      ) {
+
+        withdrawAmount.value =
+          "";
+
+      }
+
+
+      updateWithdrawButton();
+
+    }
+  );
 
 }
 
-/* =====================================================
-INITIALIZE
-===================================================== */
 
-updateBalance();
-
-updateReferralStats();
-
-updateClaimButton();
-
-runTimer();
-
-/*
-Start ad-block detection after
-the page has loaded.
-*/
-
-if (
-document.readyState === "loading"
-) {
+/* =========================================================
+   PREVENT FORM RELOAD
+========================================================= */
 
 document.addEventListener(
-"DOMContentLoaded",
-function () {
+  "submit",
+  function (event) {
 
-  checkAdBlock();
+    /*
+     * Prevent normal HTML form submission
+     * because the JavaScript handles it.
+     */
 
-}
+    event.preventDefault();
 
+  }
 );
 
-}
 
-else {
+/* =========================================================
+   HANDLE ENTER KEY FOR LOGIN
+========================================================= */
 
-checkAdBlock();
-
-}
