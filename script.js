@@ -1808,3 +1808,83 @@ document.addEventListener(
    HANDLE ENTER KEY FOR LOGIN
 ========================================================= */
 
+if (loginPassword) {
+
+  loginPassword.addEventListener(
+    "keydown",
+    function (event) {
+
+      if (
+        event.key === "Enter"
+      ) {
+
+        event.preventDefault();
+
+        loginUser();
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   HANDLE ENTER KEY FOR REGISTRATION
+========================================================= */
+
+if (registerPassword) {
+
+  registerPassword.addEventListener(
+    "keydown",
+    function (event) {
+
+      if (
+        event.key === "Enter"
+      ) {
+
+        event.preventDefault();
+
+        registerUser();
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   INITIAL WITHDRAWAL STATE
+========================================================= */
+
+updateWithdrawButton();
+
+
+/* =========================================================
+   SECURITY NOTE
+========================================================= */
+
+/*
+   IMPORTANT:
+
+   The FaucetPay API key is NOT stored here.
+
+   It must remain inside Google Apps Script
+   Script Properties.
+
+   Never put the FaucetPay API key inside:
+
+   - index.html
+   - style.css
+   - script.js
+   - GitHub
+   - browser JavaScript
+*/
+
+
+/* =========================================================
+   END OF NEXUS FAUCET SCRIPT
+========================================================= */
