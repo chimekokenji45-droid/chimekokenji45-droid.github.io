@@ -1575,3 +1575,400 @@ document.addEventListener(
 
   }
 );
+/* =========================================================
+   NEXUS FAUCET — FRONTEND JAVASCRIPT
+   PART 4 OF 4
+========================================================= */
+
+
+/* =========================================================
+   REFERRAL FROM URL
+========================================================= */
+
+function setupReferralFromUrl() {
+
+  if (!registerReferral) {
+    return;
+  }
+
+  try {
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const referral =
+      params.get("ref");
+
+    if (referral && !registerReferral.value) {
+      registerReferral.value =
+        referral.trim();
+    }
+
+  } catch (error) {
+    console.error(
+      "REFERRAL URL ERROR:",
+      error
+    );
+  }
+}
+
+
+/* =========================================================
+   COPY REFERRAL LINK
+========================================================= */
+
+async function copyReferralLink() {
+
+  if (!referralLink) {
+    showMessage(
+      "Referral link is not available."
+    );
+    return;
+  }
+
+  const link =
+    referralLink.value.trim();
+
+  if (!link) {
+    showMessage(
+      "Referral link is not available."
+    );
+    return;
+  }
+
+  try {
+
+    await navigator.clipboard.writeText(link);
+
+    showMessage(
+      "Referral link copied!"
+    );
+
+  } catch (error) {
+
+    console.error(
+      "COPY ERROR:",
+      error
+    );
+
+    try {
+
+      referralLink.focus();
+      referralLink.select();
+
+      const copied =
+        document.execCommand("copy");
+
+      if (copied) {
+        showMessage(
+          "Referral link copied!"
+        );
+      } else {
+        showMessage(
+          "Please copy the referral link manually."
+        );
+      }
+
+    } catch (fallbackError) {
+
+      console.error(
+        "COPY FALLBACK ERROR:",
+        fallbackError
+      );
+
+      showMessage(
+        "Please copy the referral link manually."
+      );
+    }
+  }
+}
+
+
+/* =========================================================
+   API REQUEST
+========================================================= */
+
+async function apiPost(data) {
+
+  if (!API_URL) {
+    throw new Error(
+      "Backend API URL is missing."
+    );
+  }
+
+  let response;
+
+  try {
+
+    response = await fetch(API_URL, {
+      method: "POST",
+
+      redirect: "follow",
+
+      headers: {
+        "Content-Type":
+          "text/plain;charset=utf-8"
+      },
+
+      body: JSON.stringify(data)
+    });
+
+  } catch (error) {
+
+    console.error(
+      "NETWORK ERROR:",
+      error
+    );
+
+    throw new Error(
+      "Unable to connect to the server. Please check your internet connection."
+    );
+  }
+
+  if (!response.ok) {
+
+    throw new Error(
+      "Server error: " +
+      response.status
+    );
+  }
+
+  const text =
+    await response.text();
+
+  if (!text) {
+    throw new Error(
+      "The server returned an empty response."
+    );
+  }
+
+  let result;
+
+  try {
+
+    result = JSON.parse(text);
+
+  } catch (error) {
+
+    console.error(
+      "INVALID SERVER RESPONSE:",
+      text
+    );
+
+    throw new Error(
+      "The server returned an invalid response."
+    );
+  }
+
+  return result;
+}
+
+
+/* =========================================================
+   EMAIL VALIDATION
+========================================================= */
+
+function validEmail(email) {
+
+  if (!email) {
+    return false;
+  }
+
+  const value =
+    String(email).trim();
+
+  const pattern =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  return pattern.test(value);
+}
+
+
+/* =========================================================
+   FORMAT USDT AMOUNT
+========================================================= */
+
+function formatAmount(amount) {
+
+  const value =
+    Number(amount);
+
+  if (!Number.isFinite(value)) {
+    return "0.00000000";
+  }
+
+  return value.toFixed(DECIMALS);
+}
+
+
+/* =========================================================
+   MESSAGE SYSTEM
+========================================================= */
+
+function showMessage(message) {
+
+  const text =
+    String(message || "").trim();
+
+  if (!text) {
+    return;
+  }
+
+  console.log(
+    "NEXUS MESSAGE:",
+    text
+  );
+
+  /*
+   If the page already has a message element,
+   use it automatically.
+  */
+
+  const messageElement =
+    document.getElementById(
+      "message"
+    ) ||
+    document.getElementById(
+      "statusMessage"
+    ) ||
+    document.getElementById(
+      "formMessage"
+    );
+
+  if (messageElement) {
+
+    messageElement.textContent =
+      text;
+
+    messageElement.style.display =
+      "";
+
+    return;
+  }
+
+  /*
+   Fallback:
+   show a normal browser message.
+  */
+
+  alert(text);
+}
+
+
+/* =========================================================
+   EXTRA BUTTON PROTECTION
+========================================================= */
+
+function protectButtons() {
+
+  if (registerButton) {
+    registerButton.type = "button";
+  }
+
+  if (loginButton) {
+    loginButton.type = "button";
+  }
+
+  if (logoutButton) {
+    logoutButton.type = "button";
+  }
+
+  if (claimButton) {
+    claimButton.type = "button";
+  }
+
+  if (withdrawButton) {
+    withdrawButton.type = "button";
+  }
+
+  if (showLoginButton) {
+    showLoginButton.type = "button";
+  }
+
+  if (showRegisterButton) {
+    showRegisterButton.type = "button";
+  }
+
+  if (referralCopyButton) {
+    referralCopyButton.type = "button";
+  }
+}
+
+
+/* =========================================================
+   ENTER KEY SUPPORT
+========================================================= */
+
+function setupKeyboardActions() {
+
+  if (registerPassword) {
+
+    registerPassword.addEventListener(
+      "keydown",
+      function (event) {
+
+        if (event.key === "Enter") {
+          event.preventDefault();
+
+          if (registerButton) {
+            registerButton.click();
+          }
+        }
+      }
+    );
+  }
+
+  if (loginPassword) {
+
+    loginPassword.addEventListener(
+      "keydown",
+      function (event) {
+
+        if (event.key === "Enter") {
+          event.preventDefault();
+
+          if (loginButton) {
+            loginButton.click();
+          }
+        }
+      }
+    );
+  }
+
+  if (withdrawAmount) {
+
+    withdrawAmount.addEventListener(
+      "input",
+      function () {
+        updateWithdrawButton();
+      }
+    );
+  }
+}
+
+
+/* =========================================================
+   FINAL INITIALIZATION
+========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+
+    /*
+     getElements() has already run from Part 1.
+    */
+
+    protectButtons();
+
+    setupKeyboardActions();
+
+    updateWithdrawButton();
+
+    console.log(
+      "Nexus Faucet JavaScript loaded successfully."
+    );
+  }
+);
