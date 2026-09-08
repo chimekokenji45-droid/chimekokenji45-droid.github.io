@@ -1,0 +1,726 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+body {
+  font-family: Arial, sans-serif;
+  background: #0b1020;
+  color: #ffffff;
+  line-height: 1.6;
+}
+
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+
+button,
+input {
+  font-family: inherit;
+}
+
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(11, 16, 32, 0.95);
+  border-bottom: 1px solid #27304b;
+  backdrop-filter: blur(10px);
+}
+
+
+.header-inner {
+  max-width: 1100px;
+  margin: auto;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: bold;
+  font-size: 19px;
+}
+
+
+.logo-icon {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #5865f2;
+  border-radius: 10px;
+  font-size: 21px;
+}
+
+
+.online-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #8fffa7;
+  font-size: 13px;
+}
+
+
+.online-status span {
+  width: 8px;
+  height: 8px;
+  background: #35e66b;
+  border-radius: 50%;
+}
+
+
+
+/* =====================================================
+   HERO
+===================================================== */
+
+.hero {
+  padding: 90px 20px;
+  text-align: center;
+  background:
+    radial-gradient(
+      circle at top,
+      #202a55 0,
+      #0b1020 55%
+    );
+}
+
+
+.hero-content {
+  max-width: 800px;
+  margin: auto;
+}
+
+
+.badge,
+.section-label {
+  display: inline-block;
+  color: #9da8ff;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+}
+
+
+.hero h1 {
+  font-size: 50px;
+  line-height: 1.1;
+  margin-bottom: 20px;
+}
+
+
+.hero h1 span {
+  color: #7d88ff;
+}
+
+
+.hero p {
+  max-width: 650px;
+  margin: auto;
+  color: #a9b2c8;
+  font-size: 17px;
+}
+
+
+.hero-button {
+  display: inline-block;
+  margin-top: 30px;
+  padding: 14px 28px;
+  border-radius: 10px;
+  background: #5865f2;
+  font-weight: bold;
+}
+
+
+
+/* =====================================================
+   SECTIONS
+===================================================== */
+
+.section {
+  padding: 75px 20px;
+}
+
+
+.alternate {
+  background: #10172b;
+}
+
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+}
+
+
+.narrow {
+  max-width: 800px;
+}
+
+
+.section-heading {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+
+.section-heading h2 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+
+.section-heading p {
+  color: #9ba6c0;
+}
+
+
+
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+.dashboard-card {
+  max-width: 650px;
+  margin: auto;
+  background: #151c32;
+  border: 1px solid #27304b;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+
+.wallet-section {
+  margin-bottom: 25px;
+}
+
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+
+input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #34405f;
+  background: #0d1427;
+  color: #ffffff;
+  font-size: 15px;
+  outline: none;
+}
+
+
+input:focus {
+  border-color: #6875ff;
+}
+
+
+small {
+  display: block;
+  margin-top: 8px;
+  color: #7f8aa5;
+  font-size: 12px;
+}
+
+
+
+/* =====================================================
+   BALANCE
+===================================================== */
+
+.balance-box {
+  text-align: center;
+  background: #0d1427;
+  border: 1px solid #293653;
+  border-radius: 14px;
+  padding: 25px;
+  margin-bottom: 20px;
+}
+
+
+.balance-box span,
+.claim-box > span {
+  display: block;
+  color: #9ba6c0;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+
+.balance-box strong {
+  display: block;
+  font-size: 38px;
+}
+
+
+.balance-box small {
+  color: #7d88ff;
+  font-weight: bold;
+}
+
+
+
+/* =====================================================
+   CLAIM
+===================================================== */
+
+.claim-box {
+  text-align: center;
+  background: #11182c;
+  border: 1px solid #293653;
+  border-radius: 14px;
+  padding: 25px;
+}
+
+
+.claim-box strong {
+  display: block;
+  font-size: 42px;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+}
+
+
+button {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 15px;
+  background: #5865f2;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+
+
+/* =====================================================
+   ADVERTISEMENT
+===================================================== */
+
+.ad-slot {
+  margin-top: 22px;
+  padding: 15px;
+  border: 1px dashed #394565;
+  border-radius: 10px;
+  text-align: center;
+  color: #68738e;
+  font-size: 12px;
+}
+
+
+.ad-slot div {
+  margin-top: 8px;
+  padding: 25px;
+  background: #0d1427;
+  border-radius: 8px;
+}
+
+
+
+/* =====================================================
+   MESSAGE
+===================================================== */
+
+.message {
+  min-height: 25px;
+  margin-top: 15px;
+  text-align: center;
+  color: #8fffa7;
+  font-size: 14px;
+}
+.message.error {
+  color: #ff4d5e;
+}
+
+.message.success {
+  color: #8fffa7;
+}
+
+
+/* =====================================================
+   WITHDRAW
+===================================================== */
+
+.withdraw-section {
+  margin-top: 25px;
+  padding-top: 25px;
+  border-top: 1px solid #293653;
+}
+
+
+.withdraw-section h3 {
+  margin-bottom: 7px;
+}
+
+
+.withdraw-section p {
+  color: #9ba6c0;
+  margin-bottom: 15px;
+}
+
+
+.withdraw-section strong {
+  color: #ffffff;
+}
+
+
+.withdraw-section input {
+  margin-bottom: 12px;
+}
+
+
+
+/* =====================================================
+   REFERRAL
+===================================================== */
+
+.referral-section {
+  margin-top: 25px;
+  padding-top: 25px;
+  border-top: 1px solid #293653;
+}
+
+
+.referral-section h3 {
+  margin-bottom: 8px;
+}
+
+
+.referral-section > p {
+  color: #9ba6c0;
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+
+.referral-box {
+  margin-bottom: 20px;
+}
+
+
+.referral-input {
+  display: flex;
+  gap: 8px;
+}
+
+
+.referral-input input {
+  flex: 1;
+}
+
+
+.referral-input button {
+  width: auto;
+  min-width: 85px;
+  padding: 14px 18px;
+}
+
+
+.referral-stats {
+  display: grid;
+  grid-template-columns:
+    repeat(3, 1fr);
+  gap: 10px;
+}
+
+
+.referral-stats > div {
+  background: #0d1427;
+  border: 1px solid #293653;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+}
+
+
+.referral-stats span {
+  display: block;
+  color: #9ba6c0;
+  font-size: 12px;
+  margin-bottom: 7px;
+}
+
+
+.referral-stats strong {
+  display: block;
+  font-size: 18px;
+}
+
+
+.referral-stats small {
+  margin-top: 3px;
+  color: #6875ff;
+}
+
+
+
+/* =====================================================
+   STEPS
+===================================================== */
+
+.steps {
+  display: grid;
+  grid-template-columns:
+    repeat(4, 1fr);
+  gap: 15px;
+}
+
+
+.step-card {
+  background: #151c32;
+  border: 1px solid #27304b;
+  border-radius: 14px;
+  padding: 22px;
+}
+
+
+.step-number {
+  color: #7d88ff;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+
+.step-card h3 {
+  margin: 12px 0 8px;
+}
+
+
+.step-card p {
+  color: #9ba6c0;
+  font-size: 14px;
+}
+
+
+
+/* =====================================================
+   CONTENT
+===================================================== */
+
+.content-text {
+  color: #a9b2c8;
+  margin-bottom: 18px;
+}
+
+
+.warning-box {
+  padding: 18px;
+  margin-top: 25px;
+  background: #191e31;
+  border: 1px solid #414b6b;
+  border-radius: 10px;
+  color: #c5cce0;
+}
+
+
+
+/* =====================================================
+   SAFETY
+===================================================== */
+
+.safety-list {
+  padding-left: 20px;
+  color: #a9b2c8;
+}
+
+
+.safety-list li {
+  margin-bottom: 14px;
+}
+
+
+
+/* =====================================================
+   FAQ
+===================================================== */
+
+details {
+  background: #151c32;
+  border: 1px solid #27304b;
+  border-radius: 10px;
+  padding: 17px 20px;
+  margin-bottom: 12px;
+}
+
+
+summary {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+
+details p {
+  color: #9ba6c0;
+  margin-top: 12px;
+}
+
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.site-footer {
+  padding: 35px 20px;
+  text-align: center;
+  border-top: 1px solid #27304b;
+  background: #080d19;
+}
+
+
+.footer-logo {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+
+.footer-nav {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+
+.footer-nav a {
+  color: #9ba6c0;
+  font-size: 13px;
+}
+
+
+.footer-nav a:hover {
+  color: #ffffff;
+}
+
+
+.site-footer p {
+  color: #68738e;
+  font-size: 12px;
+}
+
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 700px) {
+
+  .hero {
+    padding: 65px 20px;
+  }
+
+
+  .hero h1 {
+    font-size: 36px;
+  }
+
+
+  .hero p {
+    font-size: 15px;
+  }
+
+
+  .section {
+    padding: 55px 15px;
+  }
+
+
+  .section-heading h2 {
+    font-size: 27px;
+  }
+
+
+  .dashboard-card {
+    padding: 20px;
+  }
+
+
+  .balance-box strong {
+    font-size: 30px;
+  }
+
+
+  .claim-box strong {
+    font-size: 36px;
+  }
+
+
+  .steps {
+    grid-template-columns: 1fr;
+  }
+
+
+  .header-inner {
+    padding: 12px 15px;
+  }
+
+
+  .logo {
+    font-size: 16px;
+  }
+
+
+  .referral-input {
+    flex-direction: column;
+  }
+
+
+  .referral-input button {
+    width: 100%;
+  }
+
+
+  .referral-stats {
+    grid-template-columns: 1fr;
+  }
+
+}
