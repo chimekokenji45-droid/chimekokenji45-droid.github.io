@@ -1548,22 +1548,24 @@ async function apiPost(data) {
 
 
   const response =
-    await fetch(
-      NEXUS_API_URL,
-      {
+  await fetch(
+    NEXUS_API_URL,
+    {
 
-        method: "POST",
+      method: "POST",
 
-        headers: {
-          "Content-Type":
-            "text/plain;charset=utf-8"
-        },
+      redirect: "follow",
 
-        body:
-          JSON.stringify(data)
+      headers: {
+        "Content-Type":
+          "text/plain;charset=utf-8"
+      },
 
-      }
-    );
+      body:
+        JSON.stringify(data)
+
+    }
+  );
 
 
   if (!response.ok) {
