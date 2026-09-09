@@ -1477,3 +1477,329 @@ function removeSessionToken() {
     SESSION_KEY
   );
          }
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+async function logoutUser() {
+
+  const token =
+    getSessionToken();
+
+
+  clearClaimTimer();
+
+
+  try {
+
+    if (token) {
+
+      await apiPost({
+        action: "logout",
+        token: token
+      });
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Logout error:",
+      error
+    );
+
+  }
+
+
+  removeSessionToken();
+
+
+  currentUser = null;
+
+  currentBalance = 0;
+
+
+  resetDashboard();
+
+
+  showMessage(
+    "You have been logged out."
+  );
+}
+
+
+/* =========================================================
+   RESET DASHBOARD
+========================================================= */
+
+function resetDashboard() {
+
+  clearClaimTimer();
+
+
+  currentUser = null;
+
+  currentBalance = 0;
+
+
+  if (accountEmail) {
+
+    accountEmail.textContent =
+      "";
+
+  }
+
+
+  if (faucetEmail) {
+
+    faucetEmail.textContent =
+      "";
+
+  }
+
+
+  if (balanceElement) {
+
+    balanceElement.textContent =
+      "0.00000000";
+
+  }
+
+
+  if (referralLink) {
+
+    referralLink.value =
+      "";
+
+    referralLink.placeholder =
+      "Login to see your referral link";
+
+  }
+
+
+  if (referralEarnings) {
+
+    referralEarnings.textContent =
+      "0.00000000";
+
+  }
+
+
+  if (referralCount) {
+
+    referralCount.textContent =
+      "0";
+
+  }
+
+
+  if (withdrawAmount) {
+
+    withdrawAmount.value =
+      "";
+
+  }
+
+
+  if (countdownElement) {
+
+    countdownElement.textContent =
+      "LOGIN TO CLAIM";
+
+  }
+
+
+  updateAccountUI();
+}
+
+
+/* =========================================================
+   KEYBOARD ACTIONS
+========================================================= */
+
+function setupKeyboardActions() {
+
+  if (loginPassword) {
+
+    loginPassword.addEventListener(
+      "keydown",
+      function (event) {
+
+        if (event.key === "Enter") {
+
+          event.preventDefault();
+
+          loginUser();
+
+        }
+
+      }
+    );
+
+  }
+
+
+  if (registerPassword) {
+
+    registerPassword.addEventListener(
+      "keydown",
+      function (event) {
+
+        if (event.key === "Enter") {
+
+          event.preventDefault();
+
+          registerUser();
+
+        }
+
+      }
+    );
+
+  }
+}
+
+
+/* =========================================================
+   PREVENT ACCIDENTAL FORM SUBMISSION
+========================================================= */
+
+function protectButtons() {
+
+  document.addEventListener(
+    "submit",
+    function (event) {
+
+      event.preventDefault();
+
+    }
+  );
+}
+
+
+/* =========================================================
+   API REQUEST
+========================================================= */
+
+async function apiPost(data) {
+
+  const response =
+    await fetch(
+      API_URL,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "text/plain;charset=utf-8"
+        },
+
+        body:
+          JSON.stringify(data)
+      }
+    );
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      "Server error: " +
+      response.status
+    );
+
+  }
+
+
+  const text =
+    await response.text();
+
+
+  let result;
+
+
+  try {
+
+    result =
+      JSON.parse(text);
+
+  } catch (error) {
+
+    console.error(
+      "Invalid server response:",
+      text
+    );
+
+    throw new Error(
+      "The server returned an invalid response."
+    );
+
+  }
+
+
+  return result;
+}
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+function showMessage(message) {
+
+  console.log(
+    "Nexus Faucet:",
+    message
+  );
+
+
+  /*
+   * If your HTML has a message element,
+   * use it automatically.
+   */
+
+  const messageElement =
+    document.getElementById(
+      "message"
+    );
+
+
+  if (messageElement) {
+
+    messageElement.textContent =
+      message;
+
+    messageElement.style.display =
+      "block";
+
+
+    setTimeout(
+      function () {
+
+        messageElement.style.display =
+          "none";
+
+      },
+      5000
+    );
+
+
+    return;
+  }
+
+
+  /*
+   * Fallback for browsers.
+   */
+
+  alert(message);
+}
+
+
+/* =========================================================
+   END
+========================================================= */
+
+console.log(
+  "Nexus Faucet frontend initialized."
+);
