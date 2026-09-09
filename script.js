@@ -1609,37 +1609,30 @@ function updateWithdrawButton() {
     return;
   }
 
-
-  const amount =
-    withdrawAmount
-
-      ? Number(
-          withdrawAmount.value || 0
-        )
-
-      : 0;
-
-
   const loggedIn =
     !!getSessionToken();
 
+  if (!loggedIn) {
+
+    withdrawButton.disabled = true;
+    withdrawButton.textContent = "LOGIN TO WITHDRAW";
+
+    return;
+  }
+
+  const amount =
+    withdrawAmount
+      ? Number(withdrawAmount.value || 0)
+      : 0;
 
   const validAmount =
+    Number.isFinite(amount) &&
+    amount >= MIN_WITHDRAWAL &&
+    amount <= currentBalance;
 
-    Number.isFinite(
-      amount
-    ) &&
+  withdrawButton.disabled = !validAmount;
 
-    amount >=
-      MIN_WITHDRAWAL &&
-
-    amount <=
-      currentBalance;
-
-
-  withdrawButton.disabled =
-    !loggedIn ||
-    !validAmount;
+  withdrawButton.textContent = "WITHDRAW";
 }
 
 
