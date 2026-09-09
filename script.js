@@ -554,10 +554,13 @@ function displayUser(user) {
   }
 
 
-  if (accountEmail) {
+  if (faucetEmail) {
 
-    accountEmail.textContent =
-      user.email || "";
+  faucetEmail.textContent =
+    user.faucetPayEmail ||
+    user.faucetpayEmail ||
+    user.email ||
+    "";
 
   }
 
