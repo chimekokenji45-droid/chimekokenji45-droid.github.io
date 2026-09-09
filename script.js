@@ -556,11 +556,8 @@ function displayUser(user) {
 
   if (faucetEmail) {
 
-  faucetEmail.textContent =
-    user.faucetPayEmail ||
-    user.faucetpayEmail ||
-    user.email ||
-    "";
+  faucetEmail.value =
+    user.email || "";
 
   }
 
