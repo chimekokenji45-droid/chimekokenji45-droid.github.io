@@ -456,3 +456,526 @@ async function loginUser() {
 
   }
 }
+/* =========================================================
+   LOAD ACCOUNT
+========================================================= */
+
+async function loadAccount() {
+
+  const token = getSessionToken();
+
+  if (!token) {
+    resetDashboard();
+    return;
+  }
+
+
+  try {
+
+    const response =
+      await apiPost({
+        action: "status",
+        token: token
+      });
+
+
+    if (!response.success) {
+      throw new Error(
+        response.error || "Unable to load account."
+      );
+    }
+
+
+    currentUser =
+      response.user || null;
+
+
+    currentBalance =
+      Number(response.balance || 0);
+
+
+    displayUser(currentUser);
+
+    displayBalance(currentBalance);
+
+    updateAccountUI();
+
+
+    const remaining =
+      Number(
+        response.remainingClaimSeconds || 0
+      );
+
+
+    if (remaining > 0) {
+
+      startClaimTimer(remaining);
+
+    } else {
+
+      enableClaimButton();
+
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      "Account loading error:",
+      error
+    );
+
+
+    removeSessionToken();
+
+    currentUser = null;
+
+    currentBalance = 0;
+
+    resetDashboard();
+
+
+    showMessage(
+      error.message || "Session expired. Please login again."
+    );
+
+  }
+}
+
+
+/* =========================================================
+   DISPLAY USER
+========================================================= */
+
+function displayUser(user) {
+
+  if (!user) {
+    return;
+  }
+
+
+  if (accountEmail) {
+
+    accountEmail.textContent =
+      user.email || "";
+
+  }
+
+
+  if (faucetEmail) {
+
+    faucetEmail.textContent =
+      user.email || "";
+
+  }
+
+
+  if (referralLink) {
+
+    let link =
+      user.referralLink || "";
+
+
+    if (!link && user.referralId) {
+
+      link =
+        window.location.origin +
+        window.location.pathname +
+        "?ref=" +
+        encodeURIComponent(
+          user.referralId
+        );
+
+    }
+
+
+    referralLink.value = link;
+
+  }
+
+
+  if (referralEarnings) {
+
+    referralEarnings.textContent =
+      Number(
+        user.referralEarnings || 0
+      ).toFixed(DECIMALS);
+
+  }
+
+
+  if (referralCount) {
+
+    referralCount.textContent =
+      Number(
+        user.referralCount || 0
+      );
+
+  }
+}
+
+
+/* =========================================================
+   DISPLAY BALANCE
+========================================================= */
+
+function displayBalance(amount) {
+
+  currentBalance =
+    Number(amount || 0);
+
+
+  if (balanceElement) {
+
+    balanceElement.textContent =
+      currentBalance.toFixed(
+        DECIMALS
+      );
+
+  }
+
+
+  updateWithdrawButton();
+}
+
+
+/* =========================================================
+   ACCOUNT UI
+========================================================= */
+
+function updateAccountUI() {
+
+  const loggedIn =
+    !!getSessionToken();
+
+
+  /*
+   * REGISTER
+   */
+
+  if (registerSection) {
+
+    registerSection.style.display =
+      loggedIn
+        ? "none"
+        : "";
+
+  }
+
+
+  /*
+   * LOGIN
+   */
+
+  if (loginSection) {
+
+    loginSection.style.display =
+      loggedIn
+        ? "none"
+        : "";
+
+  }
+
+
+  /*
+   * ACCOUNT
+   */
+
+  if (accountSection) {
+
+    accountSection.style.display =
+      loggedIn
+        ? "block"
+        : "none";
+
+  }
+
+
+  /*
+   * LOGOUT
+   */
+
+  if (logoutButton) {
+
+    logoutButton.style.display =
+      loggedIn
+        ? ""
+        : "none";
+
+  }
+
+
+  /*
+   * CLAIM BUTTON
+   */
+
+  if (claimButton && !loggedIn) {
+
+    claimButton.disabled = true;
+
+    claimButton.textContent =
+      "LOGIN TO CLAIM";
+
+  }
+
+
+  /*
+   * REFERRAL COPY BUTTON
+   */
+
+  if (referralCopyButton) {
+
+    if (loggedIn) {
+
+      referralCopyButton.disabled =
+        false;
+
+      referralCopyButton.textContent =
+        "COPY";
+
+    } else {
+
+      referralCopyButton.disabled =
+        true;
+
+      referralCopyButton.textContent =
+        "LOGIN TO COPY";
+
+    }
+
+  }
+
+
+  /*
+   * WITHDRAW BUTTON
+   */
+
+  updateWithdrawButton();
+}
+
+
+/* =========================================================
+   WITHDRAW BUTTON
+========================================================= */
+
+function updateWithdrawButton() {
+
+  if (!withdrawButton) {
+    return;
+  }
+
+
+  const loggedIn =
+    !!getSessionToken();
+
+
+  /*
+   * USER NOT LOGGED IN
+   */
+
+  if (!loggedIn) {
+
+    withdrawButton.disabled =
+      true;
+
+    withdrawButton.textContent =
+      "LOGIN TO WITHDRAW";
+
+    return;
+  }
+
+
+  /*
+   * GET AMOUNT
+   */
+
+  const amount =
+    withdrawAmount
+      ? Number(
+          withdrawAmount.value || 0
+        )
+      : 0;
+
+
+  /*
+   * CHECK AMOUNT
+   */
+
+  const validAmount =
+    Number.isFinite(amount) &&
+    amount >= MIN_WITHDRAWAL &&
+    amount <= currentBalance;
+
+
+  /*
+   * BUTTON STATE
+   */
+
+  withdrawButton.disabled =
+    !validAmount;
+
+
+  /*
+   * BUTTON TEXT
+   */
+
+  withdrawButton.textContent =
+    validAmount
+      ? "WITHDRAW"
+      : "ENTER VALID AMOUNT";
+}
+
+
+/* =========================================================
+   SHOW LOGIN
+========================================================= */
+
+function showLogin() {
+
+  if (registerSection) {
+    registerSection.style.display = "none";
+  }
+
+
+  if (loginSection) {
+    loginSection.style.display = "";
+  }
+
+
+  if (accountSection) {
+    accountSection.style.display = "none";
+  }
+}
+
+
+/* =========================================================
+   SHOW REGISTER
+========================================================= */
+
+function showRegister() {
+
+  if (registerSection) {
+    registerSection.style.display = "";
+  }
+
+
+  if (loginSection) {
+    loginSection.style.display = "none";
+  }
+
+
+  if (accountSection) {
+    accountSection.style.display = "none";
+  }
+}
+
+
+/* =========================================================
+   CLAIM REWARD
+========================================================= */
+
+async function claimReward() {
+
+  const token =
+    getSessionToken();
+
+
+  if (!token) {
+
+    showMessage(
+      "Please login before claiming."
+    );
+
+    return;
+
+  }
+
+
+  if (
+    claimButton &&
+    claimButton.disabled
+  ) {
+    return;
+  }
+
+
+  if (claimButton) {
+
+    claimButton.disabled = true;
+
+    claimButton.textContent =
+      "CLAIMING...";
+
+  }
+
+
+  try {
+
+    const response =
+      await apiPost({
+        action: "claim",
+        token: token
+      });
+
+
+    if (!response.success) {
+
+      throw new Error(
+        response.error ||
+        "Claim failed."
+      );
+
+    }
+
+
+    currentBalance =
+      Number(
+        response.balance || 0
+      );
+
+
+    displayBalance(
+      currentBalance
+    );
+
+
+    if (
+      response.referralEarnings !==
+      undefined &&
+      referralEarnings
+    ) {
+
+      referralEarnings.textContent =
+        Number(
+          response.referralEarnings
+        ).toFixed(
+          DECIMALS
+        );
+
+    }
+
+
+    showMessage(
+      "Claim successful! +" +
+      REWARD.toFixed(DECIMALS) +
+      " USDT"
+    );
+
+
+    startClaimTimer(
+      CLAIM_INTERVAL
+    );
+
+
+  } catch (error) {
+
+    showMessage(
+      error.message ||
+      "Claim failed."
+    );
+
+
+    await loadAccount();
+
+  }
+}
