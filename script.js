@@ -174,7 +174,8 @@ function getElements() {
     document.getElementById("referralLink");
 
   referralCopyButton =
-    document.getElementById("referralCopyButton");
+  document.getElementById("referralCopyButton") ||
+  document.getElementById("copyReferralButton");
 
   referralEarnings =
     document.getElementById("referralEarnings");
