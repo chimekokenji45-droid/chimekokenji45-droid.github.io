@@ -1545,12 +1545,6 @@ function resetDashboard() {
   }
 
 
-  if (faucetEmail) {
-
-    faucetEmail.textContent =
-      "";
-
-  }
 
 
   if (balanceElement) {
