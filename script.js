@@ -561,7 +561,12 @@ function displayUser(user) {
 
   }
 
+ if (faucetEmail) {
 
+  faucetEmail.value =
+    user.email || "";
+
+ }
 
 
   if (referralLink) {
