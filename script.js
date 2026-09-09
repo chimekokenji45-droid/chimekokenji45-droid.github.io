@@ -1548,12 +1548,12 @@ function resetDashboard() {
   }
 
 
-  if (faucetEmail) {
+ if (faucetEmail) {
 
-    faucetEmail.textContent =
-      "";
+  faucetEmail.value =
+    user.email || "";
 
-  }
+ }
 
 
   if (balanceElement) {
