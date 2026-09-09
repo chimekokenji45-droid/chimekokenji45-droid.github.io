@@ -1539,12 +1539,12 @@ function resetDashboard() {
   currentBalance = 0;
 
 
- if (faucetEmail) {
+   if (faucetEmail) {
 
-  faucetEmail.value =
-    user.email || "";
+    faucetEmail.textContent =
+      "";
 
- }
+   }
 
 
 
