@@ -912,6 +912,22 @@ function updateAccountUI() {
   }
 
 
+  /* =====================================================
+     REFERRAL COPY BUTTON
+  ===================================================== */
+
+  if (referralCopyButton) {
+
+    referralCopyButton.disabled =
+      !loggedIn;
+
+    referralCopyButton.textContent =
+      loggedIn
+        ? "COPY"
+        : "LOGIN TO COPY";
+  }
+
+
   updateWithdrawButton();
 }
 
