@@ -979,3 +979,501 @@ async function claimReward() {
 
   }
 }
+
+/* =========================================================
+   CLAIM TIMER
+========================================================= */
+
+function startClaimTimer(seconds) {
+
+  clearClaimTimer();
+
+  const safeSeconds =
+    Math.max(
+      0,
+      Number(seconds || 0)
+    );
+
+
+  nexusClaimEndTime =
+    Date.now() +
+    safeSeconds * 1000;
+
+
+  if (safeSeconds <= 0) {
+
+    enableClaimButton();
+
+    return;
+  }
+
+
+  if (claimButton) {
+
+    claimButton.disabled = true;
+
+    claimButton.textContent =
+      "PLEASE WAIT";
+
+  }
+
+
+  updateClaimTimer();
+
+
+  claimTimer =
+    setInterval(
+      updateClaimTimer,
+      1000
+    );
+}
+
+
+/* =========================================================
+   UPDATE CLAIM TIMER
+========================================================= */
+
+function updateClaimTimer() {
+
+  const remaining =
+    Math.max(
+      0,
+      Math.ceil(
+        (
+          nexusClaimEndTime -
+          Date.now()
+        ) / 1000
+      )
+    );
+
+
+  if (countdownElement) {
+
+    countdownElement.textContent =
+      formatTime(remaining);
+
+  }
+
+
+  if (remaining <= 0) {
+
+    clearClaimTimer();
+
+    enableClaimButton();
+
+  }
+}
+
+
+/* =========================================================
+   FORMAT TIME
+========================================================= */
+
+function formatTime(totalSeconds) {
+
+  const seconds =
+    Math.max(
+      0,
+      Number(totalSeconds || 0)
+    );
+
+
+  const hours =
+    Math.floor(
+      seconds / 3600
+    );
+
+
+  const minutes =
+    Math.floor(
+      (seconds % 3600) / 60
+    );
+
+
+  const remainingSeconds =
+    seconds % 60;
+
+
+  return (
+    String(hours).padStart(2, "0") +
+    ":" +
+    String(minutes).padStart(2, "0") +
+    ":" +
+    String(remainingSeconds).padStart(2, "0")
+  );
+}
+
+
+/* =========================================================
+   CLEAR TIMER
+========================================================= */
+
+function clearClaimTimer() {
+
+  if (claimTimer) {
+
+    clearInterval(
+      claimTimer
+    );
+
+    claimTimer = null;
+
+  }
+
+  nexusClaimEndTime = 0;
+}
+
+
+/* =========================================================
+   ENABLE CLAIM BUTTON
+========================================================= */
+
+function enableClaimButton() {
+
+  if (!claimButton) {
+    return;
+  }
+
+
+  if (!getSessionToken()) {
+
+    claimButton.disabled =
+      true;
+
+    claimButton.textContent =
+      "LOGIN TO CLAIM";
+
+    if (countdownElement) {
+
+      countdownElement.textContent =
+        "LOGIN TO CLAIM";
+
+    }
+
+    return;
+  }
+
+
+  claimButton.disabled =
+    false;
+
+  claimButton.textContent =
+    "CLAIM NOW";
+
+
+  if (countdownElement) {
+
+    countdownElement.textContent =
+      "READY TO CLAIM";
+
+  }
+}
+
+
+/* =========================================================
+   WITHDRAWAL INPUT
+========================================================= */
+
+function setupWithdrawalInput() {
+
+  if (!withdrawAmount) {
+    return;
+  }
+
+
+  withdrawAmount.addEventListener(
+    "input",
+    function () {
+
+      updateWithdrawButton();
+
+    }
+  );
+
+
+  updateWithdrawButton();
+}
+
+
+/* =========================================================
+   REQUEST WITHDRAWAL
+========================================================= */
+
+async function requestWithdrawal() {
+
+  const token =
+    getSessionToken();
+
+
+  if (!token) {
+
+    showMessage(
+      "Please login before withdrawing."
+    );
+
+    return;
+  }
+
+
+  const amount =
+    withdrawAmount
+      ? Number(
+          withdrawAmount.value || 0
+        )
+      : 0;
+
+
+  if (
+    !Number.isFinite(amount) ||
+    amount < MIN_WITHDRAWAL
+  ) {
+
+    showMessage(
+      "Minimum withdrawal is " +
+      MIN_WITHDRAWAL.toFixed(DECIMALS) +
+      " USDT."
+    );
+
+    return;
+  }
+
+
+  if (amount > currentBalance) {
+
+    showMessage(
+      "Insufficient balance."
+    );
+
+    return;
+  }
+
+
+  if (withdrawButton) {
+
+    withdrawButton.disabled =
+      true;
+
+    withdrawButton.textContent =
+      "PROCESSING...";
+
+  }
+
+
+  try {
+
+    const response =
+      await apiPost({
+        action: "withdraw",
+        token: token,
+        amount: amount
+      });
+
+
+    if (!response.success) {
+
+      throw new Error(
+        response.error ||
+        "Withdrawal failed."
+      );
+
+    }
+
+
+    currentBalance =
+      Number(
+        response.balance ||
+        0
+      );
+
+
+    displayBalance(
+      currentBalance
+    );
+
+
+    if (withdrawAmount) {
+
+      withdrawAmount.value =
+        "";
+
+    }
+
+
+    showMessage(
+      response.message ||
+      "Withdrawal request submitted successfully."
+    );
+
+
+    updateWithdrawButton();
+
+
+  } catch (error) {
+
+    showMessage(
+      error.message ||
+      "Withdrawal failed."
+    );
+
+
+    updateWithdrawButton();
+
+  }
+}
+
+
+/* =========================================================
+   REFERRAL URL
+========================================================= */
+
+function setupReferralFromUrl() {
+
+  if (!registerReferral) {
+    return;
+  }
+
+
+  try {
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+
+    const ref =
+      params.get("ref");
+
+
+    if (ref) {
+
+      registerReferral.value =
+        ref;
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Referral URL error:",
+      error
+    );
+
+  }
+}
+
+
+/* =========================================================
+   COPY REFERRAL LINK
+========================================================= */
+
+async function copyReferralLink() {
+
+  if (!getSessionToken()) {
+
+    showMessage(
+      "Please login to copy your referral link."
+    );
+
+    return;
+  }
+
+
+  if (!referralLink) {
+
+    showMessage(
+      "Referral link is not available."
+    );
+
+    return;
+  }
+
+
+  const link =
+    referralLink.value.trim();
+
+
+  if (!link) {
+
+    showMessage(
+      "Referral link is not available."
+    );
+
+    return;
+  }
+
+
+  try {
+
+    await navigator.clipboard.writeText(
+      link
+    );
+
+
+    showMessage(
+      "Referral link copied!"
+    );
+
+
+  } catch (error) {
+
+    try {
+
+      referralLink.focus();
+
+      referralLink.select();
+
+      document.execCommand(
+        "copy"
+      );
+
+
+      showMessage(
+        "Referral link copied!"
+      );
+
+
+    } catch (fallbackError) {
+
+      showMessage(
+        "Please copy the referral link manually."
+      );
+
+    }
+
+  }
+}
+
+
+/* =========================================================
+   SESSION STORAGE
+========================================================= */
+
+function saveSessionToken(token) {
+
+  if (!token) {
+    return;
+  }
+
+
+  localStorage.setItem(
+    SESSION_KEY,
+    token
+  );
+}
+
+
+function getSessionToken() {
+
+  return localStorage.getItem(
+    SESSION_KEY
+  );
+}
+
+
+function removeSessionToken() {
+
+  localStorage.removeItem(
+    SESSION_KEY
+  );
+         }
