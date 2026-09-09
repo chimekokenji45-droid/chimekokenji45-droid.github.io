@@ -554,10 +554,16 @@ function displayUser(user) {
   }
 
 
+       if (faucetEmail) {
+
+    faucetEmail.textContent =
+      "";
+
+       }
      if (faucetEmail) {
 
-  faucetEmail.value =
-    user.email || "";
+    faucetEmail.textContent =
+      "";
 
      }
 
