@@ -561,12 +561,12 @@ function displayUser(user) {
 
   }
 
- if (faucetEmail) {
+   if (faucetEmail) {
 
-  faucetEmail.value =
-    user.email || "";
+    faucetEmail.textContent =
+      "";
 
- }
+   }
 
 
   if (referralLink) {
