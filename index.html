@@ -1,458 +1,1206 @@
-"use strict";
+<!DOCTYPE html><html lang="en"><head>  <meta charset="UTF-8"><meta  name="viewport"
+content="width=device-width, initial-scale=1.0"
 
-/* =========================================================
-   NEXUS FAUCET
-   FRONTEND JAVASCRIPT
-========================================================= */
+«»
 
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbxkoS7x7Rd8w2yUYN7-Ly1Uy2hGfSaeCSzi8YlEHmEKeAy4R7qjVpKuY93xY1DbfdB4Qg/exec";
+<meta
+name="description"
+content="Nexus Faucet - Earn small USDT rewards every 30 minutes."
 
-const REWARD = 0.00002500;
-const MIN_WITHDRAWAL = 0.00050000;
-const CLAIM_INTERVAL = 1800;
-const DECIMALS = 8;
-const SESSION_KEY = "nexus_session_token";
+«»
 
-let currentUser = null;
-let currentBalance = 0;
+<meta
+name="robots"
+content="index, follow"
 
-let claimTimer = null;
-let nexusClaimEndTime = 0;
+«»
 
-let registerEmail;
-let registerPassword;
-let registerReferral;
-let registerButton;
+  <title>Nexus Faucet — USDT Faucet</title>  <link  
+    rel="stylesheet"  
+    href="style.css"  
+  ></head><body>  <!-- =====================================================  
+       HEADER  
+  ====================================================== -->  <header class="site-header"><div class="header-inner">  <a
+href="#top"
+class="logo"
 
-let loginEmail;
-let loginPassword;
-let loginButton;
+> 
 
-let logoutButton;
+<span class="logo-icon">  
+  N  
+</span>  
 
-let showLoginButton;
-let showRegisterButton;
+<span>  
+  Nexus Faucet  
+</span>
 
-let registerSection;
-let loginSection;
-let accountSection;
+  </a>    <span class="online-status">  <span></span>  
 
-let accountEmail;
-let faucetEmail;
+Online
 
-let balanceElement;
+  </span>  </div>    </header>  <!-- =====================================================  
+       MAIN  
+  ====================================================== -->  <main id="top"><!-- ===================================================  
+     HERO  
+==================================================== -->  <section class="hero">    <div class="hero-content">  <span class="badge">  
+  USDT REWARD FAUCET  
+</span>  
 
-let claimButton;
-let countdownElement;
 
-let withdrawAmount;
-let withdrawButton;
+<h1>  
 
-let referralLink;
-let referralCopyButton;
-let referralEarnings;
-let referralCount;
+  Earn small USDT rewards  
 
+  <span>  
+    every 30 minutes.  
+  </span>  
 
-/* =========================================================
-   START
-========================================================= */
+</h1>  
 
-document.addEventListener("DOMContentLoaded", function () {
 
-  getElements();
+<p>  
 
-  setupButtons();
+  Nexus Faucet is a simple cryptocurrency  
+  rewards platform where eligible users can  
+  request small USDT faucet rewards.  
 
-  setupReferralFromUrl();
+</p>  
 
-  setupWithdrawalInput();
 
-  setupKeyboardActions();
+<a  
+  href="#account"  
+  class="hero-button"  
+>  
+  START CLAIMING  
+</a>
 
-  protectButtons();
+  </div>  </section>  <!-- ===================================================  
+     ACCOUNT / REGISTRATION / LOGIN  
+==================================================== -->  <section  
+  id="account"  
+  class="section"  
+>    <div class="container">  <div class="section-heading">  
 
-  updateAccountUI();
+  <span class="section-label">  
+    YOUR ACCOUNT  
+  </span>  
 
-  const token = getSessionToken();
 
-  if (token) {
-    loadAccount();
-  } else {
-    resetDashboard();
-  }
+  <h2>  
+    Create an account or log in  
+  </h2>  
 
-  console.log("Nexus Faucet JavaScript loaded successfully.");
 
-});
+  <p>  
 
+    Your balance, claims and referrals are  
+    securely connected to your account.  
 
-/* =========================================================
-   GET HTML ELEMENTS
-========================================================= */
+  </p>  
 
-function getElements() {
+</div>  
 
-  registerEmail =
-    document.getElementById("registerEmail");
 
-  registerPassword =
-    document.getElementById("registerPassword");
 
-  registerReferral =
-    document.getElementById("registerReferral");
+<div class="dashboard-card">  
 
-  registerButton =
-    document.getElementById("registerButton");
 
+  <!-- =================================================  
+       REGISTRATION  
+  ================================================== -->  
 
-  loginEmail =
-    document.getElementById("loginEmail");
+  <div  
+    id="registerSection"  
+    class="wallet-section"  
+  >  
 
-  loginPassword =
-    document.getElementById("loginPassword");
+    <h3>  
+      Create Account  
+    </h3>  
 
-  loginButton =
-    document.getElementById("loginButton");
 
+    <label for="registerEmail">  
+      Email  
+    </label>  
 
-  logoutButton =
-    document.getElementById("logoutButton");
 
+    <input  
+      type="email"  
+      id="registerEmail"  
+      placeholder="Enter your email"  
+      autocomplete="email"  
+    >  
 
-  showLoginButton =
-    document.getElementById("showLoginButton");
 
-  showRegisterButton =
-    document.getElementById("showRegisterButton");
+    <label for="registerPassword">  
+      Password  
+    </label>  
 
 
-  registerSection =
-    document.getElementById("registerSection");
+    <input  
+      type="password"  
+      id="registerPassword"  
+      placeholder="At least 8 characters"  
+      autocomplete="new-password"  
+    >  
 
-  loginSection =
-    document.getElementById("loginSection");
 
-  accountSection =
-    document.getElementById("accountSection");
+    <label for="registerReferral">  
+      Referral ID  
+      <small>(optional)</small>  
+    </label>  
 
 
-  accountEmail =
-    document.getElementById("accountEmail");
+    <input  
+      type="text"  
+      id="registerReferral"  
+      placeholder="Enter referral ID if you have one"  
+      autocomplete="off"  
+    >  
 
-  faucetEmail =
-    document.getElementById("faucetEmail");
 
+    <button  
+      id="registerButton"  
+      type="button"  
+    >  
+      CREATE ACCOUNT  
+    </button>  
 
-  balanceElement =
-    document.getElementById("balance");
 
+    <p>  
+      Already have an account?  
+      <button  
+        id="showLoginButton"  
+        type="button"  
+      >  
+        LOGIN  
+      </button>  
+    </p>  
 
-  claimButton =
-    document.getElementById("claimButton");
+  </div>  
 
-  countdownElement =
-    document.getElementById("countdown");
 
 
-  withdrawAmount =
-    document.getElementById("withdrawAmount");
+  <!-- =================================================  
+       LOGIN  
+  ================================================== -->  
 
-  withdrawButton =
-    document.getElementById("withdrawButton");
+  <div  
+    id="loginSection"  
+    class="wallet-section"  
+    style="display: none;"  
+  >  
 
+    <h3>  
+      Login  
+    </h3>  
 
-  referralLink =
-    document.getElementById("referralLink");
 
-  referralCopyButton =
-    document.getElementById("referralCopyButton")
-    || document.getElementById("copyReferralButton");
+    <label for="loginEmail">  
+      Email  
+    </label>  
 
-  referralEarnings =
-    document.getElementById("referralEarnings");
 
-  referralCount =
-    document.getElementById("referralCount");
-}
+    <input  
+      type="email"  
+      id="loginEmail"  
+      placeholder="Enter your email"  
+      autocomplete="email"  
+    >  
 
 
-/* =========================================================
-   BUTTON SETUP
-========================================================= */
+    <label for="loginPassword">  
+      Password  
+    </label>  
 
-function setupButtons() {
 
-  if (registerButton) {
-    registerButton.addEventListener(
-      "click",
-      registerUser
-    );
-  }
+    <input  
+      type="password"  
+      id="loginPassword"  
+      placeholder="Enter your password"  
+      autocomplete="current-password"  
+    >  
 
 
-  if (loginButton) {
-    loginButton.addEventListener(
-      "click",
-      loginUser
-    );
-  }
+    <button  
+      id="loginButton"  
+      type="button"  
+    >  
+      LOGIN  
+    </button>  
 
 
-  if (logoutButton) {
-    logoutButton.addEventListener(
-      "click",
-      logoutUser
-    );
-  }
+    <p>  
+      Don't have an account?  
+      <button  
+        id="showRegisterButton"  
+        type="button"  
+      >  
+        CREATE ACCOUNT  
+      </button>  
+    </p>  
 
+  </div>  
 
-  if (claimButton) {
-    claimButton.addEventListener(
-      "click",
-      claimReward
-    );
-  }
 
 
-  if (withdrawButton) {
-    withdrawButton.addEventListener(
-      "click",
-      requestWithdrawal
-    );
-  }
+  <!-- =================================================  
+       ACCOUNT STATUS  
+  ================================================== -->  
 
+  <div  
+    id="accountSection"  
+    style="display: none;"  
+  >  
 
-  if (showLoginButton) {
-    showLoginButton.addEventListener(
-      "click",
-      showLogin
-    );
-  }
+    <div class="wallet-section">  
 
+      <span>  
+        Logged in as  
+      </span>  
 
-  if (showRegisterButton) {
-    showRegisterButton.addEventListener(
-      "click",
-      showRegister
-    );
-  }
 
+      <strong id="accountEmail">  
+        —  
+      </strong>  
 
-  if (referralCopyButton) {
-    referralCopyButton.addEventListener(
-      "click",
-      copyReferralLink
-    );
-  }
-}
 
+      <button  
+        id="logoutButton"  
+        type="button"  
+      >  
+        LOG OUT  
+      </button>  
 
-/* =========================================================
-   REGISTER
-========================================================= */
+    </div>  
 
-async function registerUser() {
 
-  const email =
-    registerEmail
-      ? registerEmail.value.trim()
-      : "";
+  </div>  
 
-  const password =
-    registerPassword
-      ? registerPassword.value
-      : "";
 
-  const referral =
-    registerReferral
-      ? registerReferral.value.trim()
-      : "";
 
+  <!-- MESSAGE -->  
 
-  if (!email) {
-    showMessage("Please enter your email.");
-    return;
-  }
+  <div  
+    id="message"  
+    class="message"  
+    aria-live="polite"  
+  ></div>  
 
 
-  if (!password || password.length < 6) {
-    showMessage(
-      "Password must be at least 6 characters."
-    );
-    return;
-  }
+</div>
 
+  </div>  </section>  <!-- ===================================================  
+     FAUCET DASHBOARD  
+==================================================== -->  <section  
+  id="faucet"  
+  class="section alternate"  
+>    <div class="container">  <div class="section-heading">  
 
-  if (registerButton) {
-    registerButton.disabled = true;
-    registerButton.textContent = "CREATING...";
-  }
+  <span class="section-label">  
+    FAUCET DASHBOARD  
+  </span>  
 
 
-  try {
+  <h2>  
+    Claim your USDT reward  
+  </h2>  
 
-    const response =
-      await apiPost({
-        action: "register",
-        email: email,
-        password: password,
-        referralId: referral
-      });
 
+  <p>  
 
-    if (!response.success) {
-      throw new Error(
-        response.error || "Registration failed."
-      );
-    }
+    Log in to your account and claim when  
+    your timer reaches zero.  
 
+  </p>  
 
-    showMessage(
-      "Registration successful. You can now login."
-    );
+</div>  
 
 
-    if (registerEmail) {
-      registerEmail.value = "";
-    }
 
-    if (registerPassword) {
-      registerPassword.value = "";
-    }
+<div  
+  class="dashboard-card"  
+  id="faucetDashboard"  
+>  
 
-    if (registerReferral) {
-      registerReferral.value = "";
-    }
 
+  <!-- ACCOUNT EMAIL -->  
 
-    showLogin();
+  <div class="wallet-section">  
 
+    <label for="faucetEmail">  
+      FaucetPay Email  
+    </label>  
 
-  } catch (error) {
 
-    showMessage(
-      error.message || "Registration failed."
-    );
+    <input  
+      type="email"  
+      id="faucetEmail"  
+      placeholder="Your FaucetPay email"  
+      autocomplete="email"  
+      readonly  
+    >  
 
-  } finally {
 
-    if (registerButton) {
-      registerButton.disabled = false;
-      registerButton.textContent = "REGISTER";
-    }
+    <small>  
 
-  }
-}
+      Your FaucetPay email is taken from  
+      your registered account.  
 
+    </small>  
 
-/* =========================================================
-   LOGIN
-========================================================= */
+  </div>  
 
-async function loginUser() {
 
-  const email =
-    loginEmail
-      ? loginEmail.value.trim()
-      : "";
 
-  const password =
-    loginPassword
-      ? loginPassword.value
-      : "";
+  <!-- BALANCE -->  
 
+  <div class="balance-box">  
 
-  if (!email) {
-    showMessage("Please enter your email.");
-    return;
-  }
+    <span>  
+      Your Balance  
+    </span>  
 
 
-  if (!password) {
-    showMessage("Please enter your password.");
-    return;
-  }
+    <strong id="balance">  
+      0.00000000  
+    </strong>  
 
 
-  if (loginButton) {
-    loginButton.disabled = true;
-    loginButton.textContent = "LOGGING IN...";
-  }
+    <small>  
+      USDT  
+    </small>  
 
+  </div>  
 
-  try {
 
-    const response =
-      await apiPost({
-        action: "login",
-        email: email,
-        password: password
-      });
 
+  <!-- CLAIM -->  
 
-    if (
-      !response.success ||
-      !response.token
-    ) {
-      throw new Error(
-        response.error || "Login failed."
-      );
-    }
+  <div class="claim-box">  
 
+    <span>  
+      Next Claim  
+    </span>  
 
-    saveSessionToken(response.token);
 
+    <strong id="countdown">
 
-    currentUser =
-      response.user || null;
+30:00
+</strong>
 
+<button  
+      id="claimButton"  
+      type="button"  
+      disabled  
+    >  
+      LOGIN TO CLAIM  
+    </button>  
 
-    currentBalance =
-      Number(response.balance || 0);
+  </div>  
 
 
-    displayUser(currentUser);
 
-    displayBalance(currentBalance);
+  <!-- ADVERTISEMENT -->  
 
-    updateAccountUI();
+  <div class="ad-slot">  
 
+    <span>  
+      Advertisement  
+    </span>  
 
-    if (loginPassword) {
-      loginPassword.value = "";
-    }
 
+    <div>  
+      Ad space  
+    </div>  
 
-    await loadAccount();
+  </div>  
 
 
-    showMessage("Login successful.");
 
+  <!-- WITHDRAW -->  
 
-  } catch (error) {
+  <div class="withdraw-section">  
 
-    removeSessionToken();
+    <h3>  
+      Withdraw  
+    </h3>  
 
-    currentUser = null;
 
-    currentBalance = 0;
+    <p>  
 
-    resetDashboard();
+      Minimum withdrawal:  
 
+      <strong>  
+        0.00050000 USDT  
+      </strong>  
 
-    showMessage(
-      error.message || "Login failed."
-    );
+    </p>  
 
 
-  } finally {
+    <input  
+      type="number"  
+      id="withdrawAmount"  
+      placeholder="Amount in USDT"  
+      min="0.0005"  
+      step="0.00000001"  
+    >  
 
-    if (loginButton) {
-      loginButton.disabled = false;
-      loginButton.textContent = "LOGIN";
-    }
 
-  }
-}
+    <button  
+      id="withdrawButton"  
+      type="button"  
+      disabled  
+    >  
+      LOGIN TO WITHDRAW  
+    </button>  
+
+
+    <small>  
+
+      Withdrawals are processed through  
+      the secure server-side backend.  
+
+    </small>  
+
+  </div>  
+
+
+
+  <!-- =================================================  
+       REFERRAL  
+  ================================================== -->  
+
+  <div class="referral-section">  
+
+    <h3>  
+      Referral Program  
+    </h3>  
+
+
+    <p>  
+
+      Earn a 20% referral commission from  
+      qualifying claims made by users you refer.  
+
+    </p>  
+
+
+    <div class="referral-box">  
+
+      <label for="referralLink">  
+        Your Referral Link  
+      </label>  
+
+
+      <div class="referral-input">  
+
+        <input  
+          type="text"  
+          id="referralLink"  
+          readonly  
+          placeholder="Login to see your referral link"  
+        >  
+
+
+        <button
+
+id="referralCopyButton"
+type="button"
+disabled
+
+> 
+
+COPY
+</button>
+
+</div>  
+
+    </div>  
+
+
+
+    <div class="referral-stats">  
+
+
+      <div>  
+
+        <span>  
+          Referrals  
+        </span>  
+
+
+        <strong id="referralCount">  
+          0  
+        </strong>  
+
+      </div>  
+
+
+
+      <div>  
+
+        <span>  
+          Referral Earnings  
+        </span>  
+
+
+        <strong id="referralEarnings">  
+          0.00000000  
+        </strong>  
+
+
+        <small>  
+          USDT  
+        </small>  
+
+      </div>  
+
+
+
+      <div>  
+
+        <span>  
+          Commission  
+        </span>  
+
+
+        <strong>  
+          20%  
+        </strong>  
+
+      </div>  
+
+
+    </div>  
+
+  </div>  
+
+
+</div>
+
+  </div>  </section>  <!-- ===================================================  
+     HOW IT WORKS  
+==================================================== -->  <section  
+  id="how-it-works"  
+  class="section"  
+>    <div class="container">  <div class="section-heading">  
+
+  <span class="section-label">  
+    HOW IT WORKS  
+  </span>  
+
+
+  <h2>  
+    Claiming is simple  
+  </h2>  
+
+</div>  
+
+
+
+<div class="steps">  
+
+
+  <article class="step-card">  
+
+    <span class="step-number">  
+      01  
+    </span>  
+
+
+    <h3>  
+      Create an account  
+    </h3>  
+
+
+    <p>  
+
+      Create your Nexus Faucet account  
+      using your email and password.  
+
+    </p>  
+
+  </article>  
+
+
+
+  <article class="step-card">  
+
+    <span class="step-number">  
+      02  
+    </span>  
+
+
+    <h3>  
+      Wait 30 minutes  
+    </h3>  
+
+
+    <p>  
+
+      Wait until your server-controlled  
+      claim timer reaches zero.  
+
+    </p>  
+
+  </article>  
+
+
+
+  <article class="step-card">  
+
+    <span class="step-number">  
+      03  
+    </span>  
+
+
+    <h3>  
+      Claim your reward  
+    </h3>  
+
+
+    <p>  
+
+      Press CLAIM NOW when your next  
+      claim becomes available.  
+
+    </p>  
+
+  </article>  
+
+
+
+  <article class="step-card">  
+
+    <span class="step-number">  
+      04  
+    </span>  
+
+
+    <h3>  
+      Reach the minimum  
+    </h3>  
+
+
+    <p>  
+
+      Build your balance until it reaches  
+      the 0.00050000 USDT withdrawal minimum.  
+
+    </p>  
+
+  </article>  
+
+
+</div>
+
+  </div>  </section>  <!-- ===================================================  
+     ABOUT  
+==================================================== -->  <section  
+  id="about"  
+  class="section alternate"  
+>    <div class="container narrow">  <div class="section-heading">  
+
+  <span class="section-label">  
+    ABOUT  
+  </span>  
+
+
+  <h2>  
+    About Nexus Faucet  
+  </h2>  
+
+</div>  
+
+
+<p class="content-text">  
+
+  Nexus Faucet is designed as a simple  
+  cryptocurrency rewards platform focused  
+  on small USDT faucet claims.  
+
+</p>  
+
+
+<p class="content-text">  
+
+  The service is intended to provide users  
+  with a straightforward way to participate  
+  in faucet rewards and request withdrawals  
+  after reaching the required minimum.  
+
+</p>  
+
+
+<p class="content-text">  
+
+  Faucet rewards are small and should not be  
+  considered guaranteed income.  
+
+</p>
+
+  </div>  </section>  <!-- ===================================================  
+     USDT GUIDE  
+==================================================== -->  <section  
+  id="usdt-guide"  
+  class="section"  
+>    <div class="container narrow">  <div class="section-heading">  
+
+  <span class="section-label">  
+    USDT GUIDE  
+  </span>  
+
+
+  <h2>  
+    What is USDT?  
+  </h2>  
+
+</div>  
+
+
+<p class="content-text">  
+
+  USDT is a cryptocurrency commonly known  
+  as a stablecoin. It is designed to maintain  
+  a value close to the United States dollar,  
+  although cryptocurrency services and markets  
+  can change.  
+
+</p>  
+
+
+<p class="content-text">  
+
+  USDT can exist on different blockchain  
+  networks. Always check which network is  
+  supported before sending or receiving funds.  
+
+</p>  
+
+
+<div class="warning-box">  
+
+  <strong>  
+    Important:  
+  </strong>  
+
+
+  Always verify the blockchain network and  
+  destination before sending cryptocurrency.  
+
+</div>
+
+  </div>  </section>  <!-- ===================================================  
+     FAUCETPAY GUIDE  
+==================================================== -->  <section  
+  id="faucetpay-guide"  
+  class="section alternate"  
+>    <div class="container narrow">  <div class="section-heading">  
+
+  <span class="section-label">  
+    FAUCETPAY GUIDE  
+  </span>  
+
+
+  <h2>  
+    Using FaucetPay  
+  </h2>  
+
+</div>  
+
+
+<p class="content-text">  
+
+  FaucetPay is a cryptocurrency micropayment  
+  service used by various faucet websites.  
+
+</p>  
+
+
+<p class="content-text">  
+
+  Before requesting a withdrawal, users should  
+  check their account information and confirm  
+  that the destination details are correct.  
+
+</p>  
+
+
+<p class="content-text">  
+
+  Never share your FaucetPay password, private  
+  keys, or recovery information with another person.  
+
+</p>
+
+  </div>  </section>  <!-- ===================================================  
+     SAFETY  
+==================================================== -->  <section  
+  id="safety"  
+  class="section"  
+>    <div class="container narrow">  <div class="section-heading">  
+
+  <span class="section-label">  
+    SAFETY  
+  </span>  
+
+
+  <h2>  
+    Cryptocurrency safety  
+  </h2>  
+
+</div>  
+
+
+<ul class="safety-list">  
+
+
+  <li>  
+    Never share your wallet private key.  
+  </li>  
+
+
+  <li>  
+    Never share your recovery phrase.  
+  </li>  
+
+
+  <li>  
+    Never send money to someone claiming  
+    they can unlock your faucet balance.  
+  </li>  
+
+
+  <li>  
+    Verify cryptocurrency network information  
+    before making a transaction.  
+  </li>  
+
+
+  <li>  
+    Be careful with websites requesting  
+    passwords or recovery phrases.  
+  </li>  
+
+
+  <li>  
+    Cryptocurrency transactions may be  
+    difficult or impossible to reverse.  
+  </li>  
+
+
+</ul>
+
+  </div>  </section>  <!-- ===================================================  
+     FAQ  
+==================================================== -->  <section  
+  id="faq"  
+  class="section alternate"  
+>    <div class="container narrow">  <div class="section-heading">  
+
+  <span class="section-label">  
+    FAQ  
+  </span>  
+
+
+  <h2>  
+    Frequently asked questions  
+  </h2>  
+
+</div>  
+
+
+
+<details>  
+
+  <summary>  
+    How often can I claim?  
+  </summary>  
+
+
+  <p>  
+
+    The current faucet configuration uses  
+    a 30-minute claim interval.  
+
+  </p>  
+
+</details>  
+
+
+
+<details>  
+
+  <summary>  
+    How much is each claim?  
+  </summary>  
+
+
+  <p>  
+
+    The current reward is  
+    0.00002500 USDT per successful claim.  
+
+  </p>  
+
+</details>  
+
+
+
+<details>  
+
+  <summary>  
+    What is the minimum withdrawal?  
+  </summary>  
+
+
+  <p>  
+
+    The current minimum withdrawal is  
+    0.00050000 USDT.  
+
+  </p>  
+
+</details>  
+
+
+
+<details>  
+
+  <summary>  
+    How does the referral program work?  
+  </summary>  
+
+
+  <p>  
+
+    Referrers receive a 20% commission  
+    from qualifying referred-user faucet rewards.  
+
+  </p>  
+
+</details>  
+
+
+
+<details>  
+
+  <summary>  
+    Do I have to click advertisements to claim?  
+  </summary>  
+
+
+  <p>  
+
+    No. Advertisements should remain separate  
+    from the faucet claim function.  
+
+  </p>  
+
+</details>  
+
+
+
+<details>  
+
+  <summary>  
+    Are faucet rewards guaranteed?  
+  </summary>  
+
+
+  <p>  
+
+    No. Faucet operation and payout availability  
+    can depend on the service's operating  
+    conditions and other factors.  
+
+  </p>  
+
+</details>
+
+  </div>  </section>  <!-- ===================================================  
+     CONTACT  
+==================================================== -->  <section  
+  id="contact"  
+  class="section"  
+>    <div class="container narrow">  <div class="section-heading">  
+
+  <span class="section-label">  
+    CONTACT  
+  </span>  
+
+
+  <h2>  
+    Contact Nexus Faucet  
+  </h2>  
+
+</div>  
+
+
+<p class="content-text">  
+
+  For questions about the website, claims,  
+  or withdrawals, users should contact the  
+  Nexus Faucet support team.  
+
+</p>  
+
+
+<p class="content-text">  
+
+  Replace this text with your real support  
+  email address before launching the service.  
+
+</p>
+
+  </div>  </section>  <!-- ===================================================  
+     TERMS  
+==================================================== -->  <section  
+  id="terms"  
+  class="section alternate"  
+>    <div class="container narrow">  <div class="section-heading">  
+
+  <span class="section-label">  
+    TERMS  
+  </span>  
+
+
+  <h2>  
+    Terms of Service  
+  </h2>  
+
+</div>  
+
+
+<p class="content-text">  
+
+  Users must use Nexus Faucet lawfully and  
+  must not attempt to manipulate, exploit,  
+  automate, or interfere with the service.  
+
+</p>  
+
+
+<p class="content-text">  
+
+  Nexus Faucet may reject or suspend activity  
+  that appears fraudulent, abusive, automated,  
+  or inconsistent with the service rules.  
+
+</p>  
+
+
+<p class="content-text">  
+
+  Faucet rewards, claim availability, and  
+  withdrawal processing may change or be  
+  temporarily suspended when necessary.  
+
+</p>
+
+  </div>  </section>  <!-- ===================================================  
+     PRIVACY  
+==================================================== -->  <section  
+  id="privacy"  
+  class="section"  
+>    <div class="container narrow">  <div class="section-heading">  
+
+  <span class="section-label">  
+    PRIVACY  
+  </span>  
+
+
+  <h2>  
+    Privacy Policy  
+  </h2>  
+
+</div>  
+
+
+<p class="content-text">  
+
+  Nexus Faucet may process information required  
+  to operate the faucet, prevent abuse, provide  
+  support, and process withdrawals.  
+
+</p>  
+
+
+<p class="content-text">  
+
+  Advertising and security services may also  
+  process information according to their own  
+  privacy policies.  
+
+</p>  
+
+
+<p class="content-text">  
+
+  Before launch, this policy should be updated  
+  with the actual services used by Nexus Faucet,  
+  information collected, retention practices,  
+  and contact information.  
+
+</p>
+
+  </div>  </section>    </main>  <!-- =====================================================  
+       FOOTER  
+  ====================================================== -->  <footer class="site-footer"><div class="container">    <div class="footer-logo">  
+    Nexus Faucet  
+  </div>    <nav class="footer-nav">  <a href="#faucet">  
+  Faucet  
+</a>  
+
+<a href="#how-it-works">  
+  How It Works  
+</a>  
+
+<a href="#about">  
+  About  
+</a>  
+
+<a href="#usdt-guide">  
+  USDT Guide  
+</a>  
+
+<a href="#faucetpay-guide">  
+  FaucetPay  
+</a>  
+
+<a href="#faq">  
+  FAQ  
+</a>  
+
+<a href="#contact">  
+  Contact  
+</a>  
+
+<a href="#terms">  
+  Terms  
+</a>  
+
+<a href="#privacy">  
+  Privacy  
+</a>
+
+  </nav>  <p>  
+    Nexus Faucet © 2026  
+  </p>  </div>    </footer>    <!-- =====================================================  
+       NEXUS FAUCET BACKEND  
+  ====================================================== -->    <script>  
+  
+    /*  
+    Google Apps Script Web App endpoint.  
+  
+    This is NOT your FaucetPay API key.  
+    Your FaucetPay key remains safely inside  
+    Google Apps Script Script Properties.  
+    */  
+  
+    const NEXUS_API_URL =  
+      "https://script.google.com/macros/s/AKfycbxkoS7x7Rd8w2yUYN7-Ly1Uy2hGfSaeCSzi8YlEHmEKeAy4R7qjVpKuY93xY1DbfdB4Qg/exec";  
+  
+  </script>    <script src="./script.js?v=3"></script>  </body>  
+             </html>
