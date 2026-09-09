@@ -455,8 +455,7 @@ async function loginUser() {
     }
 
   }
-}
-/* =========================================================
+                            }/* =========================================================
    LOAD ACCOUNT
 ========================================================= */
 
@@ -554,16 +553,20 @@ function displayUser(user) {
   }
 
 
-        
-   
-      if (faucetEmail) {
+  if (accountEmail) {
 
-  faucetEmail.value =
-    user.email || "";
+    accountEmail.textContent =
+      user.email || "";
 
-      }
+  }
 
 
+  if (faucetEmail) {
+
+    faucetEmail.textContent =
+      user.email || "";
+
+  }
 
 
   if (referralLink) {
@@ -974,8 +977,7 @@ async function claimReward() {
     await loadAccount();
 
   }
-}
-
+       }
 /* =========================================================
    CLAIM TIMER
 ========================================================= */
@@ -1472,8 +1474,7 @@ function removeSessionToken() {
   localStorage.removeItem(
     SESSION_KEY
   );
-         }
-
+}
 /* =========================================================
    LOGOUT
 ========================================================= */
@@ -1539,14 +1540,20 @@ function resetDashboard() {
   currentBalance = 0;
 
 
-    if (faucetEmail) {
+  if (accountEmail) {
 
-  faucetEmail.value =
-    user.email || "";
+    accountEmail.textContent =
+      "";
 
-    }
+  }
 
 
+  if (faucetEmail) {
+
+    faucetEmail.textContent =
+      "";
+
+  }
 
 
   if (balanceElement) {
