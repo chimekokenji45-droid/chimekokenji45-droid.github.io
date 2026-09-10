@@ -6,7 +6,7 @@
 ========================================================= */
 
 const API_URL =
-  "https://script.google.com/macros/s/AKfycbxkoS7x7Rd8w2yUYN7-Ly1Uy2hGfSaeCSzi8YlEHmEKeAy4R7qjVpKuY93xY1DbfdB4Qg/exec";
+  "https://script.google.com/macros/s/AKfycbz-l-x8IgkbBoJqCO255n10ElsZw2kfvxCHOdI19gm6kWVzt1rl8RjaLaRzwkGKZgza6g/exec";
 
 const REWARD = 0.00002500;
 const MIN_WITHDRAWAL = 0.00050000;
