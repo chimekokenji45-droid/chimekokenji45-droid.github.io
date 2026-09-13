@@ -1689,23 +1689,13 @@ async function apiPost(data) {
 
         headers: {
           "Content-Type":
-            "text/plain;charset=utf-8"
+            "application/json"
         },
 
         body:
           JSON.stringify(data)
       }
     );
-
-
-  if (!response.ok) {
-
-    throw new Error(
-      "Server error: " +
-      response.status
-    );
-
-  }
 
 
   const text =
@@ -1729,6 +1719,17 @@ async function apiPost(data) {
 
     throw new Error(
       "The server returned an invalid response."
+    );
+
+  }
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      result.message ||
+      "Server error: " +
+      response.status
     );
 
   }
