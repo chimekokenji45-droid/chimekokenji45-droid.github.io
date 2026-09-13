@@ -6,7 +6,7 @@
 ========================================================= */
 
 const API_URL =
-  "https://script.google.com/macros/s/AKfycbz-l-x8IgkbBoJqCO255n10ElsZw2kfvxCHOdI19gm6kWVzt1rl8RjaLaRzwkGKZgza6g/exec";
+  "https://olzlbbaldfsabvpptyps.supabase.co/functions/v1/nexus-api";
 
 const REWARD = 0.00002500;
 const MIN_WITHDRAWAL = 0.00050000;
