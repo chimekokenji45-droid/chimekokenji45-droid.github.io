@@ -412,7 +412,7 @@ input:focus {
 }
 
 .logout-button {
-  colour: #faf6f3;
+  color: white;
   width: auto;
   min-width: 90px;
 
