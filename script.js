@@ -554,63 +554,99 @@ function displayUser(user) {
   }
 
 
+  /* =========================
+     ACCOUNT EMAIL
+  ========================= */
+
   if (accountEmail) {
 
     accountEmail.textContent =
       user.email || "";
 
-      if (faucetEmail) {
-
-  faucetEmail.value =
-    user.email || "";
-
-      }
   }
 
 
+  if (faucetEmail) {
+
+    faucetEmail.value =
+      user.email || "";
+
+  }
+
+
+  /* =========================
+     REFERRAL LINK
+  ========================= */
 
   if (referralLink) {
 
+    const referralId =
+      user.referralId ||
+      user.referral_id ||
+      user.referralCode ||
+      user.referral_code ||
+      "";
+
     let link =
-      user.referralLink || "";
+      user.referralLink ||
+      user.referral_link ||
+      "";
 
-
-    if (!link && user.referralId) {
+    if (!link && referralId) {
 
       link =
         window.location.origin +
         window.location.pathname +
         "?ref=" +
-        encodeURIComponent(
-          user.referralId
-        );
+        encodeURIComponent(referralId);
 
     }
 
+    if (link) {
 
-    referralLink.value = link;
+      referralLink.value = link;
+
+    } else {
+
+      referralLink.value =
+        "Referral link unavailable";
+
+    }
 
   }
 
+
+  /* =========================
+     REFERRAL EARNINGS
+  ========================= */
 
   if (referralEarnings) {
 
     referralEarnings.textContent =
       Number(
-        user.referralEarnings || 0
+        user.referralEarnings ||
+        user.referral_earnings ||
+        0
       ).toFixed(DECIMALS);
 
   }
 
 
+  /* =========================
+     REFERRAL COUNT
+  ========================= */
+
   if (referralCount) {
 
     referralCount.textContent =
       Number(
-        user.referralCount || 0
+        user.referralCount ||
+        user.referral_count ||
+        0
       );
 
   }
+
 }
 
 
