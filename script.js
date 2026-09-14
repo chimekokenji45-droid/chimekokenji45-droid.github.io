@@ -585,12 +585,18 @@ function displayUser(user) {
       user.referral_id ||
       user.referralCode ||
       user.referral_code ||
+      user.referral ||
       "";
 
     let link =
       user.referralLink ||
       user.referral_link ||
       "";
+
+    /*
+      If backend did not send a complete
+      referral link, create one here.
+    */
 
     if (!link && referralId) {
 
@@ -601,6 +607,7 @@ function displayUser(user) {
         encodeURIComponent(referralId);
 
     }
+
 
     if (link) {
 
@@ -647,9 +654,12 @@ function displayUser(user) {
 
   }
 
-}
+   }
+
+         
 
 
+       
 /* =========================================================
    DISPLAY BALANCE
 ========================================================= */
