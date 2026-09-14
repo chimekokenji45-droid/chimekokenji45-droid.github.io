@@ -10,16 +10,21 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>Nexus Faucet</title>
-
   <meta
     name="description"
-    content="Nexus Faucet - Earn and withdraw USDT."
+    content="Nexus Faucet - Earn small USDT rewards every 30 minutes."
   >
+
+  <meta
+    name="robots"
+    content="index, follow"
+  >
+
+  <title>Nexus Faucet — USDT Faucet</title>
 
   <link
     rel="stylesheet"
-    href="./style.css"
+    href="style.css"
   >
 
 </head>
@@ -27,48 +32,193 @@
 
 <body>
 
-  <!-- =================================================
-       HEADER
-  ================================================== -->
+  <!-- ================= HEADER ================= -->
 
-  <header>
+  <header class="site-header">
 
-    <h1>
-      Nexus Faucet
-    </h1>
+    <div class="header-content">
 
-    <p>
-      Earn &amp; Withdraw USDT
-    </p>
+      <a
+        href="#home"
+        class="logo"
+      >
+        Nexus Faucet
+      </a>
+
+      <nav class="navigation">
+
+        <a href="#home">
+          Home
+        </a>
+
+        <a href="#registerSection">
+          Register
+        </a>
+
+        <a href="#loginSection">
+          Login
+        </a>
+
+        <a
+          href="#accountSection"
+          id="dashboardLink"
+          style="display: none;"
+        >
+          Dashboard
+        </a>
+
+      </nav>
+
+    </div>
 
   </header>
 
 
-  <!-- =================================================
-       MAIN
-  ================================================== -->
+  <!-- ================= MAIN ================= -->
 
-  <main>
+  <main id="home">
 
 
-    <!-- =================================================
-         ACCOUNT SECTION
-    ================================================== -->
+    <!-- ================= HERO ================= -->
 
-    <section
-      id="accountSection"
-      class="account-section"
-    >
+    <section class="hero-section">
 
-      <!-- ================= REGISTER ================= -->
+      <div class="hero-content">
 
-      <div
-        id="registerSection"
-        class="auth-section"
-      >
+        <h1>
+          Earn Free USDT
+        </h1>
+
+        <p>
+          Claim small USDT rewards every 30 minutes
+          and earn even more by referring friends.
+        </p>
+
+        <div class="hero-buttons">
+
+          <a
+            href="#registerSection"
+            class="primary-button"
+          >
+            Get Started
+          </a>
+
+          <a
+            href="#loginSection"
+            class="secondary-button"
+          >
+            Login
+          </a>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= FEATURES ================= -->
+
+    <section class="features-section">
+
+      <div class="section-heading">
 
         <h2>
-          Create Account
+          Why Use Nexus Faucet?
+        </h2>
+
+        <p>
+          Start earning USDT with simple faucet claims.
+        </p>
+
+      </div>
+
+
+      <div class="features-grid">
+
+        <div class="feature-card">
+
+          <div class="feature-icon">
+            💰
+          </div>
+
+          <h3>
+            Earn USDT
+          </h3>
+
+          <p>
+            Claim free USDT rewards every 30 minutes.
+          </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+          <div class="feature-icon">
+            ⏱️
+          </div>
+
+          <h3>
+            Easy Claims
+          </h3>
+
+          <p>
+            Come back after the cooldown and claim again.
+          </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+          <div class="feature-icon">
+            👥
+          </div>
+
+          <h3>
+            Referrals
+          </h3>
+
+          <p>
+            Invite friends and earn 20% referral commission.
+          </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+          <div class="feature-icon">
+            🏆
+          </div>
+
+          <h3>
+            Achievements
+          </h3>
+
+          <p>
+            Reach milestones and unlock additional bonuses.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= REGISTER ================= -->
+
+    <section
+      id="registerSection"
+      class="auth-section"
+    >
+
+      <div class="auth-card">
+
+        <h2>
+          Create Your Account
         </h2>
 
         <p>
@@ -76,75 +226,95 @@
         </p>
 
 
-        <label for="registerEmail">
-          Email
-        </label>
+        <form id="registerForm">
 
-        <input
-          type="email"
-          id="registerEmail"
-          placeholder="Enter your email"
-          autocomplete="email"
-        >
+          <div class="input-group">
 
+            <label for="registerEmail">
+              Email Address
+            </label>
 
-        <label for="registerPassword">
-          Password
-        </label>
+            <input
+              type="email"
+              id="registerEmail"
+              placeholder="Enter your email"
+              autocomplete="email"
+              required
+            >
 
-        <input
-          type="password"
-          id="registerPassword"
-          placeholder="Enter your password"
-          autocomplete="new-password"
-        >
+          </div>
 
 
-        <label for="registerReferral">
-          Referral Code
-        </label>
+          <div class="input-group">
 
-        <input
-          type="text"
-          id="registerReferral"
-          placeholder="Optional referral code"
-        >
+            <label for="registerPassword">
+              Password
+            </label>
 
+            <input
+              type="password"
+              id="registerPassword"
+              placeholder="Create a password"
+              autocomplete="new-password"
+              required
+            >
 
-        <button
-          id="registerButton"
-          type="button"
-        >
-          REGISTER
-        </button>
+          </div>
 
 
-        <p>
+          <div class="input-group">
+
+            <label for="registerReferral">
+              Referral Code
+              <span>(Optional)</span>
+            </label>
+
+            <input
+              type="text"
+              id="registerReferral"
+              placeholder="Enter referral code"
+            >
+
+          </div>
+
+
+          <button
+            type="submit"
+            id="registerButton"
+            class="auth-button"
+          >
+            REGISTER
+          </button>
+
+        </form>
+
+
+        <p class="auth-switch">
 
           Already have an account?
 
-          <button
-            id="showLoginButton"
-            type="button"
-          >
-            Login
-          </button>
+          <a href="#loginSection">
+            Login here
+          </a>
 
         </p>
 
       </div>
 
+    </section>
 
-      <!-- ================= LOGIN ================= -->
 
-      <div
-        id="loginSection"
-        class="auth-section"
-        style="display: none;"
-      >
+    <!-- ================= LOGIN ================= -->
+
+    <section
+      id="loginSection"
+      class="auth-section"
+    >
+
+      <div class="auth-card">
 
         <h2>
-          Login
+          Welcome Back
         </h2>
 
         <p>
@@ -152,299 +322,280 @@
         </p>
 
 
-        <label for="loginEmail">
-          Email
-        </label>
+        <form id="loginForm">
 
-        <input
-          type="email"
-          id="loginEmail"
-          placeholder="Enter your email"
-          autocomplete="email"
-        >
+          <div class="input-group">
 
+            <label for="loginEmail">
+              Email Address
+            </label>
 
-        <label for="loginPassword">
-          Password
-        </label>
+            <input
+              type="email"
+              id="loginEmail"
+              placeholder="Enter your email"
+              autocomplete="email"
+              required
+            >
 
-        <input
-          type="password"
-          id="loginPassword"
-          placeholder="Enter your password"
-          autocomplete="current-password"
-        >
+          </div>
 
 
-        <button
-          id="loginButton"
-          type="button"
-        >
-          LOGIN
-        </button>
+          <div class="input-group">
+
+            <label for="loginPassword">
+              Password
+            </label>
+
+            <input
+              type="password"
+              id="loginPassword"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            >
+
+          </div>
 
 
-        <p>
+          <button
+            type="submit"
+            id="loginButton"
+            class="auth-button"
+          >
+            LOGIN
+          </button>
+
+        </form>
+
+
+        <p class="auth-switch">
 
           Don't have an account?
 
-          <button
-            id="showRegisterButton"
-            type="button"
-          >
-            Register
-          </button>
+          <a href="#registerSection">
+            Register here
+          </a>
 
         </p>
 
       </div>
-
-
-      <!-- =================================================
-           LOGGED-IN ACCOUNT
-      ================================================== -->
-
-      <div
-        id="loggedInSection"
-        style="display: none;"
-      >
-
-        <h2>
-          My Account
-        </h2>
-
-        <p>
-          Logged in as:
-        </p>
-
-        <strong id="accountEmail"></strong>
-
-
-        <button
-          id="logoutButton"
-          type="button"
-        >
-          LOGOUT
-        </button>
-
-      </div>
-
-
-      <!-- =================================================
-           MESSAGE
-      ================================================== -->
-
-      <div
-        id="message"
-        class="message"
-      ></div>
 
     </section>
 
 
+    <!-- ================= HOW IT WORKS ================= -->
 
-    <!-- =================================================
-         FAUCET DASHBOARD
-    ================================================== -->
+    <section class="how-section">
+
+      <div class="section-heading">
+
+        <h2>
+          How It Works
+        </h2>
+
+      </div>
+
+
+      <div class="steps-grid">
+
+        <div class="step-card">
+
+          <div class="step-number">
+            1
+          </div>
+
+          <h3>
+            Register
+          </h3>
+
+          <p>
+            Create your free Nexus Faucet account.
+          </p>
+
+        </div>
+
+
+        <div class="step-card">
+
+          <div class="step-number">
+            2
+          </div>
+
+          <h3>
+            Claim
+          </h3>
+
+          <p>
+            Claim your USDT reward when the timer is ready.
+          </p>
+
+        </div>
+
+
+        <div class="step-card">
+
+          <div class="step-number">
+            3
+          </div>
+
+          <h3>
+            Withdraw
+          </h3>
+
+          <p>
+            Reach the minimum withdrawal amount and request your payout.
+          </p>
+
+        </div>
+
+
+        <div class="step-card">
+
+          <div class="step-number">
+            4
+          </div>
+
+          <h3>
+            Refer
+          </h3>
+
+          <p>
+            Invite friends and earn referral commissions.
+          </p>
+
+        </div>
+
+      </div>
+
+              </section>
+              <!-- =========================================================
+     NEXUS FAUCET
+     INDEX.HTML
+     PART 2 OF 2
+========================================================= -->
+
+    <!-- ================= ACCOUNT SECTION ================= -->
 
     <section
-      id="faucetDashboard"
-      class="faucet-dashboard"
+      id="accountSection"
+      class="account-section"
       style="display: none;"
     >
 
-      <h2>
-        Nexus Faucet Dashboard
-      </h2>
+      <div class="account-header">
 
+        <div>
+          <h2>My Account</h2>
 
-      <!-- =================================================
-           FAUCET EMAIL
-      ================================================== -->
-
-      <div class="dashboard-card">
-
-        <label for="faucetEmail">
-          Faucet Account
-        </label>
-
-        <input
-          type="email"
-          id="faucetEmail"
-          readonly
-        >
-
-      </div>
-
-
-
-      <!-- =================================================
-           BALANCE
-      ================================================== -->
-
-      <div class="dashboard-card">
-
-        <h3>
-          Balance
-        </h3>
-
-        <strong id="balance">
-          0.00000000
-        </strong>
-
-        <span>
-          USDT
-        </span>
-
-      </div>
-
-
-
-      <!-- =================================================
-           ACHIEVEMENT
-      ================================================== -->
-
-      <div class="achievement-section">
-
-        <h3>
-          🏆 Achievement
-        </h3>
-
-        <p>
-          Reach 5 USDT in faucet claims and
-          receive a 5 USDT bonus.
-        </p>
-
-
-        <div class="achievement-progress">
-
-          <div class="achievement-progress-info">
-
-            <span>
-              Progress
-            </span>
-
-            <strong id="achievementProgressText">
-              0.00000000 / 5.00000000 USDT
-            </strong>
-
-          </div>
-
-
-          <div class="achievement-progress-bar">
-
-            <div
-              id="achievementProgressBar"
-              class="achievement-progress-fill"
-              style="width: 0%;"
-            ></div>
-
-          </div>
-
-
-          <small id="achievementPercentage">
-            0.00%
-          </small>
-
+          <p>
+            Welcome back,
+            <strong id="accountEmail"></strong>
+          </p>
         </div>
-
-
-        <div class="achievement-bonus">
-
-          <span>
-            Achievement Bonus
-          </span>
-
-          <strong>
-            5.00000000 USDT
-          </strong>
-
-        </div>
-
-
-        <div class="achievement-completed">
-
-          <span>
-            Bonuses Earned
-          </span>
-
-          <strong id="achievementBonusCount">
-            0
-          </strong>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- =================================================
-           CLAIM
-      ================================================== -->
-
-      <div class="dashboard-card">
-
-        <h3>
-          Claim Reward
-        </h3>
-
-        <p>
-          Claim your USDT reward every 30 minutes.
-        </p>
-
-
-        <div class="countdown-box">
-
-          <strong id="countdown">
-            READY TO CLAIM
-          </strong>
-
-        </div>
-
 
         <button
-          id="claimButton"
           type="button"
+          id="logoutButton"
+          class="logout-button"
         >
-          CLAIM NOW
+          Logout
         </button>
 
       </div>
 
 
+      <!-- ================= BALANCE ================= -->
 
-      <!-- =================================================
-           WITHDRAW
-      ================================================== -->
+      <div class="balance-card">
 
-      <div class="dashboard-card">
+        <h3>Your Balance</h3>
 
-        <h3>
-          Withdraw USDT
-        </h3>
+        <div
+          id="balance"
+          class="balance"
+        >
+          0.00000000 USDT
+        </div>
+
+      </div>
+
+
+      <!-- ================= CLAIM ================= -->
+
+      <div class="claim-card">
+
+        <h3>USDT Faucet</h3>
+
+        <p>
+          Claim your free USDT reward every 30 minutes.
+        </p>
+
+        <button
+          type="button"
+          id="claimButton"
+          class="claim-button"
+        >
+          CLAIM NOW
+        </button>
+
+        <div
+          id="countdown"
+          class="countdown"
+        >
+          READY TO CLAIM
+        </div>
+
+      </div>
+
+
+      <!-- ================= WITHDRAW ================= -->
+
+      <div class="withdraw-card">
+
+        <h3>Withdraw USDT</h3>
 
         <p>
           Minimum withdrawal:
           <strong>0.00050000 USDT</strong>
         </p>
 
+        <div class="input-group">
 
-        <label for="withdrawAmount">
-          Withdrawal Amount
-        </label>
+          <label for="withdrawAmount">
+            Withdrawal Amount
+          </label>
 
-        <input
-          type="number"
-          id="withdrawAmount"
-          placeholder="0.00050000"
-          step="0.00000001"
-          min="0"
-        >
+          <input
+            type="number"
+            id="withdrawAmount"
+            placeholder="0.00050000"
+            min="0.00050000"
+            step="0.00000001"
+          >
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label for="faucetEmail">
+            FaucetPay Email
+          </label>
+
+          <input
+            type="email"
+            id="faucetEmail"
+            placeholder="Your FaucetPay email"
+          >
+
+        </div>
 
 
         <button
-          id="withdrawButton"
           type="button"
+          id="withdrawButton"
+          class="withdraw-button"
         >
           WITHDRAW
         </button>
@@ -452,257 +603,136 @@
       </div>
 
 
+      <!-- ================= REFERRAL ================= -->
 
-      <!-- =================================================
-           REFERRAL
-      ================================================== -->
+      <div class="referral-card">
 
-      <div class="dashboard-card">
-
-        <h3>
-          Referral Program
-        </h3>
+        <h3>Referral Program</h3>
 
         <p>
-          Earn 20% of your referred users'
-          faucet rewards.
+          Invite friends and earn
+          <strong>20%</strong>
+          of their faucet rewards.
         </p>
 
 
-        <label for="referralLink">
-          Your Referral Link
-        </label>
+        <div class="input-group">
 
-        <div class="referral-link-container">
+          <label for="referralLink">
+            Your Referral Link
+          </label>
 
           <input
             type="text"
             id="referralLink"
             readonly
-            value="Referral link unavailable"
           >
-
-          <button
-            id="referralCopyButton"
-            type="button"
-          >
-            COPY
-          </button>
 
         </div>
 
 
-        <p>
-          Referrals:
+        <div class="referral-count">
+
+          <span>
+            Referrals:
+          </span>
+
           <strong id="referralCount">
             0
           </strong>
-        </p>
 
+        </div>
+
+      </div>
+
+
+      <!-- ================= ACHIEVEMENT ================= -->
+
+      <div class="achievement-card">
+
+        <h3>Achievement</h3>
 
         <p>
-          Referral Earnings:
-          <strong id="referralEarnings">
-            0.00000000
-          </strong>
-          USDT
+          Reach
+          <strong>5.00000000 USDT</strong>
+          in faucet earnings to receive an extra
+          <strong>5.00000000 USDT</strong>
+          bonus.
+        </p>
+
+        <div class="achievement-progress">
+
+          <div
+            id="achievementProgress"
+            class="achievement-progress-bar"
+            style="width: 0%;"
+          ></div>
+
+        </div>
+
+        <p
+          id="achievementText"
+          class="achievement-text"
+        >
+          0.00000000 / 5.00000000 USDT
         </p>
 
       </div>
+
+
+      <!-- ================= MESSAGE ================= -->
+
+      <div
+        id="message"
+        class="message"
+        style="display: none;"
+      ></div>
 
     </section>
 
 
+    <!-- ================= FOOTER ================= -->
 
-    <!-- =================================================
-         INFORMATION
-    ================================================== -->
+    <footer class="site-footer">
 
-    <section class="info-section">
+      <div class="footer-content">
 
-      <h2>
-        How Nexus Faucet Works
-      </h2>
-
-
-      <div class="info-card">
-
-        <h3>
-          1. Create an Account
-        </h3>
+        <h3>Nexus Faucet</h3>
 
         <p>
-          Register with your email and password
-          to create your Nexus Faucet account.
+          Earn small USDT rewards by using Nexus Faucet.
+        </p>
+
+        <div class="footer-links">
+
+          <a href="#home">
+            Home
+          </a>
+
+          <a href="#accountSection">
+            Dashboard
+          </a>
+
+          <a href="#registerSection">
+            Register
+          </a>
+
+          <a href="#loginSection">
+            Login
+          </a>
+
+        </div>
+
+        <p class="copyright">
+          © 2026 Nexus Faucet. All rights reserved.
         </p>
 
       </div>
 
-
-      <div class="info-card">
-
-        <h3>
-          2. Claim USDT
-        </h3>
-
-        <p>
-          Claim your faucet reward every
-          30 minutes.
-        </p>
-
-      </div>
+    </footer>
 
 
-      <div class="info-card">
-
-        <h3>
-          3. Refer Friends
-        </h3>
-
-        <p>
-          Share your referral link and earn
-          20% of eligible faucet rewards from
-          your referrals.
-        </p>
-
-      </div>
-
-
-      <div class="info-card">
-
-        <h3>
-          4. Withdraw
-        </h3>
-
-        <p>
-          Once your balance reaches the minimum
-          withdrawal amount, you can request
-          a USDT payout.
-        </p>
-
-      </div>
-
-
-      <div class="info-card">
-
-        <h3>
-          5. Complete Achievements
-        </h3>
-
-        <p>
-          Accumulate 5 USDT in eligible faucet
-          claim progress to receive a 5 USDT
-          achievement bonus.
-        </p>
-
-      </div>
-
-    </section>
-
-
-
-    <!-- =================================================
-         FAQ
-    ================================================== -->
-
-    <section class="faq-section">
-
-      <h2>
-        Frequently Asked Questions
-      </h2>
-
-
-      <details>
-
-        <summary>
-          How often can I claim?
-        </summary>
-
-        <p>
-          You can claim once every 30 minutes.
-        </p>
-
-      </details>
-
-
-      <details>
-
-        <summary>
-          What is the minimum withdrawal?
-        </summary>
-
-        <p>
-          The minimum withdrawal amount is
-          0.00050000 USDT.
-        </p>
-
-      </details>
-
-
-      <details>
-
-        <summary>
-          How does the referral system work?
-        </summary>
-
-        <p>
-          You earn 20% of eligible faucet
-          rewards earned by users who register
-          through your referral link.
-        </p>
-
-      </details>
-
-
-      <details>
-
-        <summary>
-          How does the achievement bonus work?
-        </summary>
-
-        <p>
-          Users who accumulate 5 USDT in eligible
-          faucet claim progress receive a 5 USDT
-          achievement bonus. After the bonus is
-          awarded, the achievement progress resets
-          so the user can work toward the next bonus.
-        </p>
-
-      </details>
-
-
-      <details>
-
-        <summary>
-          Which currency does Nexus Faucet pay?
-        </summary>
-
-        <p>
-          Nexus Faucet uses USDT for faucet
-          rewards and withdrawals.
-        </p>
-
-      </details>
-
-    </section>
-
-  </main>
-
-
-  <!-- =================================================
-       FOOTER
-  ================================================== -->
-
-  <footer>
-
-    <p>
-      &copy; 2026 Nexus Faucet.
-      All rights reserved.
-    </p>
-
-          </footer>
-  
-          <!-- ================= JAVASCRIPT ================= -->
+    <!-- ================= JAVASCRIPT ================= -->
 
     <script src="script.js"></script>
 
