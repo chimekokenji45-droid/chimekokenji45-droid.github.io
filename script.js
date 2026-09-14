@@ -763,10 +763,8 @@ function updateWithdrawButton() {
     return;
   }
 
-
   const loggedIn =
     !!getSessionToken();
-
 
   /*
    * USER NOT LOGGED IN
@@ -774,15 +772,13 @@ function updateWithdrawButton() {
 
   if (!loggedIn) {
 
-    withdrawButton.disabled =
-      true;
+    withdrawButton.disabled = true;
 
     withdrawButton.textContent =
       "LOGIN TO WITHDRAW";
 
     return;
   }
-
 
   /*
    * GET AMOUNT
@@ -795,35 +791,62 @@ function updateWithdrawButton() {
         )
       : 0;
 
-
   /*
-   * CHECK AMOUNT
+   * INVALID OR EMPTY AMOUNT
    */
 
-  const validAmount =
-    Number.isFinite(amount) &&
-    amount >= MIN_WITHDRAWAL &&
-    amount <= currentBalance;
+  if (
+    !Number.isFinite(amount) ||
+    amount <= 0
+  ) {
 
+    withdrawButton.disabled = true;
+
+    withdrawButton.textContent =
+      "ENTER VALID AMOUNT";
+
+    return;
+  }
 
   /*
-   * BUTTON STATE
+   * BELOW MINIMUM WITHDRAWAL
    */
 
-  withdrawButton.disabled =
-    !validAmount;
+  if (amount < MIN_WITHDRAWAL) {
 
+    withdrawButton.disabled = true;
+
+    withdrawButton.textContent =
+      "MINIMUM " +
+      MIN_WITHDRAWAL.toFixed(8);
+
+    return;
+  }
 
   /*
-   * BUTTON TEXT
+   * MORE THAN USER BALANCE
    */
+
+  if (amount > currentBalance) {
+
+    withdrawButton.disabled = true;
+
+    withdrawButton.textContent =
+      "INSUFFICIENT BALANCE";
+
+    return;
+  }
+
+  /*
+   * VALID WITHDRAWAL AMOUNT
+   */
+
+  withdrawButton.disabled = false;
 
   withdrawButton.textContent =
-    validAmount
-      ? "WITHDRAW"
-      : "ENTER VALID AMOUNT";
-}
-
+    "WITHDRAW";
+}  
+   
 
 /* =========================================================
    SHOW LOGIN
