@@ -83,7 +83,9 @@ document.addEventListener("DOMContentLoaded", function () {
     resetDashboard();
   }
 
-  console.log("Nexus Faucet JavaScript loaded successfully.");
+  console.log(
+    "Nexus Faucet JavaScript loaded successfully."
+  );
 
 });
 
@@ -191,14 +193,12 @@ function setupButtons() {
     );
   }
 
-
   if (loginButton) {
     loginButton.addEventListener(
       "click",
       loginUser
     );
   }
-
 
   if (logoutButton) {
     logoutButton.addEventListener(
@@ -207,14 +207,12 @@ function setupButtons() {
     );
   }
 
-
   if (claimButton) {
     claimButton.addEventListener(
       "click",
       claimReward
     );
   }
-
 
   if (withdrawButton) {
     withdrawButton.addEventListener(
@@ -223,7 +221,6 @@ function setupButtons() {
     );
   }
 
-
   if (showLoginButton) {
     showLoginButton.addEventListener(
       "click",
@@ -231,14 +228,12 @@ function setupButtons() {
     );
   }
 
-
   if (showRegisterButton) {
     showRegisterButton.addEventListener(
       "click",
       showRegister
     );
   }
-
 
   if (referralCopyButton) {
     referralCopyButton.addEventListener(
@@ -298,20 +293,59 @@ async function registerUser() {
         action: "register",
         email: email,
         password: password,
-        referralId: referral
+        referral: referral
       });
 
 
     if (!response.success) {
       throw new Error(
-        response.error || "Registration failed."
+        response.message ||
+        response.error ||
+        "Registration failed."
       );
     }
 
 
-    showMessage(
-      "Registration successful. You can now login."
-    );
+    /*
+     * The backend may automatically create
+     * a session after registration.
+     */
+
+    if (response.token) {
+
+      saveSessionToken(
+        response.token
+      );
+
+      currentUser =
+        response.user || null;
+
+      currentBalance =
+        Number(
+          response.user?.balance || 0
+        );
+
+      displayUser(currentUser);
+
+      displayBalance(currentBalance);
+
+      updateAccountUI();
+
+      await loadAccount();
+
+      showMessage(
+        "Registration successful."
+      );
+
+    } else {
+
+      showMessage(
+        "Registration successful. You can now login."
+      );
+
+      showLogin();
+
+    }
 
 
     if (registerEmail) {
@@ -327,13 +361,11 @@ async function registerUser() {
     }
 
 
-    showLogin();
-
-
   } catch (error) {
 
     showMessage(
-      error.message || "Registration failed."
+      error.message ||
+      "Registration failed."
     );
 
   } finally {
@@ -397,12 +429,16 @@ async function loginUser() {
       !response.token
     ) {
       throw new Error(
-        response.error || "Login failed."
+        response.message ||
+        response.error ||
+        "Login failed."
       );
     }
 
 
-    saveSessionToken(response.token);
+    saveSessionToken(
+      response.token
+    );
 
 
     currentUser =
@@ -410,7 +446,9 @@ async function loginUser() {
 
 
     currentBalance =
-      Number(response.balance || 0);
+      Number(
+        response.user?.balance || 0
+      );
 
 
     displayUser(currentUser);
@@ -428,7 +466,9 @@ async function loginUser() {
     await loadAccount();
 
 
-    showMessage("Login successful.");
+    showMessage(
+      "Login successful."
+    );
 
 
   } catch (error) {
@@ -443,9 +483,9 @@ async function loginUser() {
 
 
     showMessage(
-      error.message || "Login failed."
+      error.message ||
+      "Login failed."
     );
-
 
   } finally {
 
@@ -455,14 +495,18 @@ async function loginUser() {
     }
 
   }
-  }
+}
+
+
 /* =========================================================
    LOAD ACCOUNT
 ========================================================= */
 
 async function loadAccount() {
 
-  const token = getSessionToken();
+  const token =
+    getSessionToken();
+
 
   if (!token) {
     resetDashboard();
@@ -481,17 +525,29 @@ async function loadAccount() {
 
     if (!response.success) {
       throw new Error(
-        response.error || "Unable to load account."
+        response.message ||
+        response.error ||
+        "Unable to load account."
       );
     }
 
+
+    /*
+     * IMPORTANT:
+     * The Edge Function returns:
+     *
+     * response.user.balance
+     * response.user.remaining_claim_seconds
+     */
 
     currentUser =
       response.user || null;
 
 
     currentBalance =
-      Number(response.balance || 0);
+      Number(
+        response.user?.balance || 0
+      );
 
 
     displayUser(currentUser);
@@ -503,13 +559,15 @@ async function loadAccount() {
 
     const remaining =
       Number(
-        response.remainingClaimSeconds || 0
+        response.user?.remaining_claim_seconds || 0
       );
 
 
     if (remaining > 0) {
 
-      startClaimTimer(remaining);
+      startClaimTimer(
+        remaining
+      );
 
     } else {
 
@@ -536,7 +594,8 @@ async function loadAccount() {
 
 
     showMessage(
-      error.message || "Session expired. Please login again."
+      error.message ||
+      "Session expired. Please login again."
     );
 
   }
@@ -554,10 +613,6 @@ function displayUser(user) {
   }
 
 
-  /* =========================
-     ACCOUNT EMAIL
-  ========================= */
-
   if (accountEmail) {
 
     accountEmail.textContent =
@@ -574,10 +629,6 @@ function displayUser(user) {
   }
 
 
-  /* =========================
-     REFERRAL LINK
-  ========================= */
-
   if (referralLink) {
 
     const referralId =
@@ -593,10 +644,6 @@ function displayUser(user) {
       user.referral_link ||
       "";
 
-    /*
-      If backend did not send a complete
-      referral link, create one here.
-    */
 
     if (!link && referralId) {
 
@@ -604,14 +651,17 @@ function displayUser(user) {
         window.location.origin +
         window.location.pathname +
         "?ref=" +
-        encodeURIComponent(referralId);
+        encodeURIComponent(
+          referralId
+        );
 
     }
 
 
     if (link) {
 
-      referralLink.value = link;
+      referralLink.value =
+        link;
 
     } else {
 
@@ -623,10 +673,6 @@ function displayUser(user) {
   }
 
 
-  /* =========================
-     REFERRAL EARNINGS
-  ========================= */
-
   if (referralEarnings) {
 
     referralEarnings.textContent =
@@ -634,14 +680,12 @@ function displayUser(user) {
         user.referralEarnings ||
         user.referral_earnings ||
         0
-      ).toFixed(DECIMALS);
+      ).toFixed(
+        DECIMALS
+      );
 
   }
 
-
-  /* =========================
-     REFERRAL COUNT
-  ========================= */
 
   if (referralCount) {
 
@@ -654,12 +698,7 @@ function displayUser(user) {
 
   }
 
-   }
-
-         
-
-
-       
+       }
 /* =========================================================
    DISPLAY BALANCE
 ========================================================= */
@@ -694,10 +733,6 @@ function updateAccountUI() {
     !!getSessionToken();
 
 
-  /*
-   * REGISTER
-   */
-
   if (registerSection) {
 
     registerSection.style.display =
@@ -707,10 +742,6 @@ function updateAccountUI() {
 
   }
 
-
-  /*
-   * LOGIN
-   */
 
   if (loginSection) {
 
@@ -722,10 +753,6 @@ function updateAccountUI() {
   }
 
 
-  /*
-   * ACCOUNT
-   */
-
   if (accountSection) {
 
     accountSection.style.display =
@@ -735,10 +762,6 @@ function updateAccountUI() {
 
   }
 
-
-  /*
-   * LOGOUT
-   */
 
   if (logoutButton) {
 
@@ -750,10 +773,6 @@ function updateAccountUI() {
   }
 
 
-  /*
-   * CLAIM BUTTON
-   */
-
   if (claimButton && !loggedIn) {
 
     claimButton.disabled = true;
@@ -763,10 +782,6 @@ function updateAccountUI() {
 
   }
 
-
-  /*
-   * REFERRAL COPY BUTTON
-   */
 
   if (referralCopyButton) {
 
@@ -791,10 +806,6 @@ function updateAccountUI() {
   }
 
 
-  /*
-   * WITHDRAW BUTTON
-   */
-
   updateWithdrawButton();
 }
 
@@ -809,16 +820,15 @@ function updateWithdrawButton() {
     return;
   }
 
+
   const loggedIn =
     !!getSessionToken();
 
-  /*
-   * USER NOT LOGGED IN
-   */
 
   if (!loggedIn) {
 
-    withdrawButton.disabled = true;
+    withdrawButton.disabled =
+      true;
 
     withdrawButton.textContent =
       "LOGIN TO WITHDRAW";
@@ -826,9 +836,6 @@ function updateWithdrawButton() {
     return;
   }
 
-  /*
-   * GET AMOUNT
-   */
 
   const amount =
     withdrawAmount
@@ -837,16 +844,14 @@ function updateWithdrawButton() {
         )
       : 0;
 
-  /*
-   * INVALID OR EMPTY AMOUNT
-   */
 
   if (
     !Number.isFinite(amount) ||
     amount <= 0
   ) {
 
-    withdrawButton.disabled = true;
+    withdrawButton.disabled =
+      true;
 
     withdrawButton.textContent =
       "ENTER VALID AMOUNT";
@@ -854,13 +859,11 @@ function updateWithdrawButton() {
     return;
   }
 
-  /*
-   * BELOW MINIMUM WITHDRAWAL
-   */
 
   if (amount < MIN_WITHDRAWAL) {
 
-    withdrawButton.disabled = true;
+    withdrawButton.disabled =
+      true;
 
     withdrawButton.textContent =
       "MINIMUM " +
@@ -869,13 +872,11 @@ function updateWithdrawButton() {
     return;
   }
 
-  /*
-   * MORE THAN USER BALANCE
-   */
 
   if (amount > currentBalance) {
 
-    withdrawButton.disabled = true;
+    withdrawButton.disabled =
+      true;
 
     withdrawButton.textContent =
       "INSUFFICIENT BALANCE";
@@ -883,16 +884,14 @@ function updateWithdrawButton() {
     return;
   }
 
-  /*
-   * VALID WITHDRAWAL AMOUNT
-   */
 
-  withdrawButton.disabled = false;
+  withdrawButton.disabled =
+    false;
 
   withdrawButton.textContent =
     "WITHDRAW";
-}  
-   
+}
+
 
 /* =========================================================
    SHOW LOGIN
@@ -901,17 +900,20 @@ function updateWithdrawButton() {
 function showLogin() {
 
   if (registerSection) {
-    registerSection.style.display = "none";
+    registerSection.style.display =
+      "none";
   }
 
 
   if (loginSection) {
-    loginSection.style.display = "";
+    loginSection.style.display =
+      "";
   }
 
 
   if (accountSection) {
-    accountSection.style.display = "none";
+    accountSection.style.display =
+      "none";
   }
 }
 
@@ -923,17 +925,20 @@ function showLogin() {
 function showRegister() {
 
   if (registerSection) {
-    registerSection.style.display = "";
+    registerSection.style.display =
+      "";
   }
 
 
   if (loginSection) {
-    loginSection.style.display = "none";
+    loginSection.style.display =
+      "none";
   }
 
 
   if (accountSection) {
-    accountSection.style.display = "none";
+    accountSection.style.display =
+      "none";
   }
 }
 
@@ -955,7 +960,6 @@ async function claimReward() {
     );
 
     return;
-
   }
 
 
@@ -969,11 +973,11 @@ async function claimReward() {
 
   if (claimButton) {
 
-    claimButton.disabled = true;
+    claimButton.disabled =
+      true;
 
     claimButton.textContent =
       "CLAIMING...";
-
   }
 
 
@@ -989,10 +993,10 @@ async function claimReward() {
     if (!response.success) {
 
       throw new Error(
+        response.message ||
         response.error ||
         "Claim failed."
       );
-
     }
 
 
@@ -1007,31 +1011,21 @@ async function claimReward() {
     );
 
 
-    if (
-      response.referralEarnings !==
-      undefined &&
-      referralEarnings
-    ) {
+    /*
+     * Refresh the complete account data
+     * after a successful claim.
+     */
 
-      referralEarnings.textContent =
-        Number(
-          response.referralEarnings
-        ).toFixed(
-          DECIMALS
-        );
-
-    }
+    await loadAccount();
 
 
     showMessage(
-      "Claim successful! +" +
-      REWARD.toFixed(DECIMALS) +
-      " USDT"
-    );
-
-
-    startClaimTimer(
-      CLAIM_INTERVAL
+      response.message ||
+      (
+        "Claim successful! +" +
+        REWARD.toFixed(DECIMALS) +
+        " USDT"
+      )
     );
 
 
@@ -1044,9 +1038,10 @@ async function claimReward() {
 
 
     await loadAccount();
-
   }
-       }
+}
+
+
 /* =========================================================
    CLAIM TIMER
 ========================================================= */
@@ -1054,6 +1049,7 @@ async function claimReward() {
 function startClaimTimer(seconds) {
 
   clearClaimTimer();
+
 
   const safeSeconds =
     Math.max(
@@ -1077,11 +1073,11 @@ function startClaimTimer(seconds) {
 
   if (claimButton) {
 
-    claimButton.disabled = true;
+    claimButton.disabled =
+      true;
 
     claimButton.textContent =
       "PLEASE WAIT";
-
   }
 
 
@@ -1184,8 +1180,8 @@ function clearClaimTimer() {
     );
 
     claimTimer = null;
-
   }
+
 
   nexusClaimEndTime = 0;
 }
@@ -1209,6 +1205,7 @@ function enableClaimButton() {
 
     claimButton.textContent =
       "LOGIN TO CLAIM";
+
 
     if (countdownElement) {
 
@@ -1245,151 +1242,7 @@ function setupWithdrawalInput() {
 
   if (!withdrawAmount) {
     return;
-  }
-
-
-  withdrawAmount.addEventListener(
-    "input",
-    function () {
-
-      updateWithdrawButton();
-
-    }
-  );
-
-
-  updateWithdrawButton();
-}
-
-
-/* =========================================================
-   REQUEST WITHDRAWAL
-========================================================= */
-
-async function requestWithdrawal() {
-
-  const token =
-    getSessionToken();
-
-
-  if (!token) {
-
-    showMessage(
-      "Please login before withdrawing."
-    );
-
-    return;
-  }
-
-
-  const amount =
-    withdrawAmount
-      ? Number(
-          withdrawAmount.value || 0
-        )
-      : 0;
-
-
-  if (
-    !Number.isFinite(amount) ||
-    amount < MIN_WITHDRAWAL
-  ) {
-
-    showMessage(
-      "Minimum withdrawal is " +
-      MIN_WITHDRAWAL.toFixed(DECIMALS) +
-      " USDT."
-    );
-
-    return;
-  }
-
-
-  if (amount > currentBalance) {
-
-    showMessage(
-      "Insufficient balance."
-    );
-
-    return;
-  }
-
-
-  if (withdrawButton) {
-
-    withdrawButton.disabled =
-      true;
-
-    withdrawButton.textContent =
-      "PROCESSING...";
-
-  }
-
-
-  try {
-
-    const response =
-      await apiPost({
-        action: "withdraw",
-        token: token,
-        amount: amount
-      });
-
-
-    if (!response.success) {
-
-      throw new Error(
-        response.error ||
-        "Withdrawal failed."
-      );
-
-    }
-
-
-    currentBalance =
-      Number(
-        response.balance ||
-        0
-      );
-
-
-    displayBalance(
-      currentBalance
-    );
-
-
-    if (withdrawAmount) {
-
-      withdrawAmount.value =
-        "";
-
-    }
-
-
-    showMessage(
-      response.message ||
-      "Withdrawal request submitted successfully."
-    );
-
-
-    updateWithdrawButton();
-
-
-  } catch (error) {
-
-    showMessage(
-      error.message ||
-      "Withdrawal failed."
-    );
-
-
-    updateWithdrawButton();
-
-  }
-}
-
-
-/* =========================================================
+     /* =========================================================
    REFERRAL URL
 ========================================================= */
 
@@ -1406,7 +1259,6 @@ function setupReferralFromUrl() {
       new URLSearchParams(
         window.location.search
       );
-
 
     const ref =
       params.get("ref");
@@ -1544,6 +1396,8 @@ function removeSessionToken() {
     SESSION_KEY
   );
 }
+
+
 /* =========================================================
    LOGOUT
 ========================================================= */
@@ -1579,7 +1433,6 @@ async function logoutUser() {
 
 
   removeSessionToken();
-
 
   currentUser = null;
 
@@ -1617,12 +1470,12 @@ function resetDashboard() {
   }
 
 
-   if (faucetEmail) {
+  if (faucetEmail) {
 
-    faucetEmail.textContent =
+    faucetEmail.value =
       "";
 
-   }
+  }
 
 
   if (balanceElement) {
@@ -1797,6 +1650,7 @@ async function apiPost(data) {
 
     throw new Error(
       result.message ||
+      result.error ||
       "Server error: " +
       response.status
     );
@@ -1819,11 +1673,6 @@ function showMessage(message) {
     message
   );
 
-
-  /*
-   * If your HTML has a message element,
-   * use it automatically.
-   */
 
   const messageElement =
     document.getElementById(
@@ -1855,10 +1704,6 @@ function showMessage(message) {
   }
 
 
-  /*
-   * Fallback for browsers.
-   */
-
   alert(message);
 }
 
@@ -1870,3 +1715,4 @@ function showMessage(message) {
 console.log(
   "Nexus Faucet frontend initialized."
 );
+ 
