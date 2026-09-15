@@ -395,39 +395,32 @@ async function loginUser() {
       ? loginPassword.value
       : "";
 
-
   if (!email) {
     showMessage("Please enter your email.");
     return;
   }
-
 
   if (!password) {
     showMessage("Please enter your password.");
     return;
   }
 
-
   if (loginButton) {
     loginButton.disabled = true;
     loginButton.textContent = "LOGGING IN...";
   }
 
-
   try {
 
-    const response =
-      await apiPost({
-        action: "login",
-        email: email,
-        password: password
-      });
+    const response = await apiPost({
+      action: "login",
+      email: email,
+      password: password
+    });
 
+    console.log("LOGIN RESPONSE:", response);
 
-    if (
-      !response.success ||
-      !response.token
-    ) {
+    if (!response.success) {
       throw new Error(
         response.message ||
         response.error ||
@@ -435,43 +428,73 @@ async function loginUser() {
       );
     }
 
+    if (!response.token) {
+      throw new Error(
+        "Login succeeded but no session token was received."
+      );
+    }
 
-    saveSessionToken(
-      response.token
+    /* SAVE SESSION FIRST */
+
+    saveSessionToken(response.token);
+
+    console.log(
+      "SESSION SAVED:",
+      getSessionToken()
     );
 
+    /* SAVE USER */
 
     currentUser =
       response.user || null;
-
 
     currentBalance =
       Number(
         response.user?.balance || 0
       );
 
+    /* SHOW ACCOUNT IMMEDIATELY */
 
     displayUser(currentUser);
 
     displayBalance(currentBalance);
 
-    updateAccountUI();
+    if (registerSection) {
+      registerSection.style.display = "none";
+    }
 
+    if (loginSection) {
+      loginSection.style.display = "none";
+    }
+
+    if (accountSection) {
+      accountSection.style.display = "block";
+    }
+
+    if (logoutButton) {
+      logoutButton.style.display = "";
+    }
+
+    /* CLEAR PASSWORD */
 
     if (loginPassword) {
       loginPassword.value = "";
     }
 
+    /* LOAD REAL ACCOUNT DATA */
 
     await loadAccount();
-
 
     showMessage(
       "Login successful."
     );
 
-
   } catch (error) {
+
+    console.error(
+      "LOGIN ERROR:",
+      error
+    );
 
     removeSessionToken();
 
@@ -480,7 +503,6 @@ async function loginUser() {
     currentBalance = 0;
 
     resetDashboard();
-
 
     showMessage(
       error.message ||
@@ -495,7 +517,7 @@ async function loginUser() {
     }
 
   }
-}
+}       
 
 
 /* =========================================================
