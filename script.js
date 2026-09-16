@@ -526,26 +526,26 @@ async function loginUser() {
 
 async function loadAccount() {
 
-  const token =
-    getSessionToken();
+  const token = getSessionToken();
 
+  console.log("LOAD ACCOUNT TOKEN:", token);
 
   if (!token) {
     resetDashboard();
     return;
   }
 
-
   try {
 
-    const response =
-      await apiPost({
-        action: "status",
-        token: token
-      });
+    const response = await apiPost({
+      action: "status",
+      token: token
+    });
 
+    console.log("STATUS RESPONSE:", response);
 
     if (!response.success) {
+
       throw new Error(
         response.message ||
         response.error ||
@@ -553,37 +553,46 @@ async function loadAccount() {
       );
     }
 
+    if (!response.user) {
 
-    /*
-     * IMPORTANT:
-     * The Edge Function returns:
-     *
-     * response.user.balance
-     * response.user.remaining_claim_seconds
-     */
+      throw new Error(
+        "The server did not return user account data."
+      );
+    }
 
-    currentUser =
-      response.user || null;
-
+    currentUser = response.user;
 
     currentBalance =
       Number(
-        response.user?.balance || 0
+        response.user.balance || 0
       );
-
 
     displayUser(currentUser);
 
     displayBalance(currentBalance);
 
-    updateAccountUI();
+    /* Make sure account is visible */
 
+    if (registerSection) {
+      registerSection.style.display = "none";
+    }
+
+    if (loginSection) {
+      loginSection.style.display = "none";
+    }
+
+    if (accountSection) {
+      accountSection.style.display = "block";
+    }
+
+    if (logoutButton) {
+      logoutButton.style.display = "";
+    }
 
     const remaining =
       Number(
-        response.user?.remaining_claim_seconds || 0
+        response.user.remaining_claim_seconds || 0
       );
-
 
     if (remaining > 0) {
 
@@ -597,31 +606,58 @@ async function loadAccount() {
 
     }
 
+    console.log(
+      "ACCOUNT LOADED SUCCESSFULLY:",
+      currentUser
+    );
 
   } catch (error) {
 
     console.error(
-      "Account loading error:",
+      "LOAD ACCOUNT ERROR:",
       error
     );
 
+    /*
+     * IMPORTANT:
+     * Do NOT delete the session here.
+     * We need to see the real error first.
+     */
 
-    removeSessionToken();
+    if (accountSection) {
+      accountSection.style.display = "block";
+    }
 
-    currentUser = null;
+    if (registerSection) {
+      registerSection.style.display = "none";
+    }
 
-    currentBalance = 0;
+    if (loginSection) {
+      loginSection.style.display = "none";
+    }
 
-    resetDashboard();
+    if (logoutButton) {
+      logoutButton.style.display = "";
+    }
 
-
-    showMessage(
+    const message =
       error.message ||
-      "Session expired. Please login again."
+      "Unable to load your account.";
+
+    console.error(
+      "NEXUS ACCOUNT ERROR:",
+      message
     );
 
+    alert(
+      "Nexus Faucet account error:\n\n" +
+      message
+    );
   }
-}
+                }
+
+
+
 
 
 /* =========================================================
