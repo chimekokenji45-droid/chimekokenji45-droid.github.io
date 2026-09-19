@@ -1,3 +1,4 @@
+alert("CYBERSTRIKE SCRIPT IS WORKING");
 // ==========================================
 // CYBERSTRIKE
 // SCRIPT.JS
